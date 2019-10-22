@@ -1,0 +1,24 @@
+{
+  "name": "conflux-utils",
+  "version": "0.0.0",
+  "description": "conflux utils",
+  "license": "LGPL-3.0",
+  "main": "index.js",
+  "homepage": "https://github.com/GeekBerry/conflux#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/GeekBerry/conflux.git"
+  },
+  "scripts": {
+    "test": "jest"
+  },
+  "dependencies": {
+    "bignumber.js": "^9.0.0",
+    "elliptic": "^6.5.1",
+    "keccak": "^2.0.0",
+    "lodash": "^4.17.15",
+    "rlp": "^2.2.3",
+    "scrypt.js": "^0.3.0",
+    "secp256k1": "^3.7.1"
+  }
+}
