@@ -9,11 +9,20 @@
     "type": "git",
     "url": "git+https://github.com/GeekBerry/conflux.git"
   },
+  "files": [
+    "src",
+    "index.js",
+    "yarn.lock"
+  ],
   "scripts": {
     "test": "jest"
   },
   "dependencies": {
+    "bignumber.js": "^9.0.0",
     "conflux-provider": "^0.0.0",
-    "conflux-utils": "^0.0.0"
+    "conflux-utils": "^0.0.0",
+    "ethers": "^4.0.38",
+    "lodash": "^4.17.15",
+    "web3-eth-abi": "^1.2.1"
   }
 }

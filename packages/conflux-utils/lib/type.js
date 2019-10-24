@@ -1,30 +1,13 @@
 const lodash = require('lodash');
 const BigNumber = require('bignumber.js');
-const {
-  randomBuffer,
-  rlpEncode,
-  sha3,
-  secp256k1ec,
-  ecsign,
-  scrypt32,
-  cipheriv,
-  decipheriv,
-} = require('./sign');
-
-// const MIN_TX_GAS = 21000;
-const MAX_TX_GAS = 100000000;
 
 // ----------------------------------- Hex ------------------------------------
 /**
  * @memberOf type
- * @param value {string|number|Buffer|Date|BigNumber|null|undefined} - The value to gen hex string.
- * @return {string} Hex string in lowercase and starts with '0x'
+ * @param value {string|number|Buffer|Date|BigNumber|null} - The value to gen hex string.
+ * @return {string} Hex string.
  */
-function Hex(value = undefined) {
-  if (value === undefined) {
-    return undefined;
-  }
-
+function Hex(value) {
   if (value === null) {
     return '0x';
   }
@@ -39,7 +22,7 @@ function Hex(value = undefined) {
     string = string.startsWith('0x') ? string : `0x${string}`;
     string = string.length % 2 ? `0x0${string.substring(2)}` : string;
 
-    if (!/^0x[0-9a-f]*$/.test(string)) {
+    if (!Hex.isHex(string)) {
       throw new Error(`"${value}" do not match hex string`);
     }
 
@@ -58,16 +41,31 @@ function Hex(value = undefined) {
 }
 
 /**
- * @param value {string|number|Buffer|Date|BigNumber|null|undefined} - The value to gen hex string and dump to Buffer.
+ * Check if is hex string.
+ *
+ * > Hex: /^0x([0-9a-f][0-9a-f])*$/
+ *
+ * @param hex {string} - Value to be check.
+ * @return {boolean}
+ */
+Hex.isHex = function (hex) {
+  return /^0x([0-9a-f][0-9a-f])*$/.test(hex);
+};
+
+/**
+ * @param hex {string} - The hex string.
  * @return {Buffer}
  */
-Hex.toBuffer = function (value) {
-  if (value === undefined) {
-    return Buffer.from('');
+Hex.toBuffer = function (hex) {
+  if (!Hex.isHex(hex)) {
+    throw new Error(`"${hex}" do not match hex string`);
   }
 
-  const buffer = Buffer.from(Hex(value).substring(2), 'hex');
-  return buffer.equals(Buffer.from('00', 'hex')) ? Buffer.from('') : buffer;
+  const buffer = Buffer.from(hex.substring(2), 'hex');
+  if (buffer.equals(Buffer.from('00', 'hex'))) {
+    return Buffer.from('');
+  }
+  return buffer;
 };
 
 // ---------------------------------- Drip ------------------------------------
@@ -126,88 +124,6 @@ function PrivateKey(value) {
   }
   return string;
 }
-
-PrivateKey.CRYPT_VERSION = '3.5';
-
-/**
- * Gen a random private key.
- *
- * @param [name] {string} - The string to be sha3.
- * @return {string} Hex string.
- */
-PrivateKey.create = function (name) {
-  return PrivateKey(sha3(name || randomBuffer(192)));
-};
-
-/**
- * @param privateKey {string}
- * @param password {string}
- * @return {{cipher: string, salt: string, iv: string, mac: string}}
- */
-PrivateKey.encrypt = function (privateKey, password) {
-  const keyBuffer = Hex.toBuffer(PrivateKey(privateKey));
-
-  if (!lodash.isString(password)) {
-    throw new Error('No password given.');
-  }
-
-  const saltBuffer = randomBuffer(32);
-  const ivBuffer = randomBuffer(16);
-  const derivedBuffer = scrypt32(Buffer.from(password), saltBuffer);
-  const cipherBuffer = cipheriv(derivedBuffer.slice(0, 16), ivBuffer, keyBuffer);
-  const macBuffer = sha3(Buffer.concat([derivedBuffer.slice(16, 32), cipherBuffer]));
-
-  return {
-    version: PrivateKey.CRYPT_VERSION,
-    salt: Hex(saltBuffer),
-    iv: Hex(ivBuffer),
-    cipher: Hex(cipherBuffer),
-    mac: Hex(macBuffer),
-  };
-};
-
-/**
- * @param options
- * @param options.version {string}
- * @param options.salt {string}
- * @param options.iv {string}
- * @param options.cipher {string}
- * @param options.mac {string}
- * @param password {string}
- * @return {string}
- */
-PrivateKey.decrypt = function ({ version, salt, iv, cipher, mac }, password) {
-  if (version !== PrivateKey.CRYPT_VERSION) {
-    throw new Error(`Not a valid version ${PrivateKey.CRYPT_VERSION} wallet`);
-  }
-
-  const saltBuffer = Hex.toBuffer(salt);
-  const ivBuffer = Hex.toBuffer(iv);
-  const derivedBuffer = scrypt32(Buffer.from(password), saltBuffer);
-  const cipherBuffer = Hex.toBuffer(cipher);
-  const macBuffer = sha3(Buffer.concat([derivedBuffer.slice(16, 32), cipherBuffer]));
-
-  if (Hex(macBuffer) !== mac) {
-    throw new Error('Key derivation failed, possibly wrong password!');
-  }
-
-  const keyBuffer = decipheriv(derivedBuffer.slice(0, 16), ivBuffer, cipherBuffer);
-  return Hex(keyBuffer);
-};
-
-/**
- * Get address by private key.
- *
- * @param privateKey {string}
- * @return {string}
- */
-PrivateKey.toAddress = function (privateKey) {
-  const buffer = Hex.toBuffer(PrivateKey(privateKey));
-  const ecKey = secp256k1ec.keyFromPrivate(buffer);
-  const publicKey = Hex(ecKey.getPublic(false, 'hex').slice(2));
-  const publicHash = Hex(sha3(Hex.toBuffer(publicKey)));
-  return Hex(publicHash.slice(-40));
-};
 
 // ----------------------------------- Address --------------------------------
 /**
@@ -273,36 +189,50 @@ function TxHash(value) {
   return string;
 }
 
-// ------------------------------ Transaction ---------------------------------
 /**
- * Signs a transaction. This account needs to be unlocked.
- *
- * TODO gen tx hash
- *
- * @memberOf type
  * @param options {object}
- * @param [options.nonce=0] {number|string} - Integer of a nonce. This allows to overwrite your own pending transactions that use the same nonce.
- * @param [options.to='0x'] {string} - - The destination address of the message, left undefined for a contract-creation transaction.
- * @param [options.value=0] {number|string|BigNumber} - The value transferred for the transaction in drip, also the endowment if it’s a contract-creation transaction.
- * @param [options.data='0x'] {string} - Either a ABI byte string containing the data of the function call on a contract, or in the case of a contract-creation transaction the initialisation code.
- * @param [options.gasPrice=1] {number|string} - The price of gas for this transaction in drip.
- * @param [options.gasLimit=MAX_TX_GAS] {number|string} - The amount of gas to use for the transaction (unused gas is refunded).
- * @param options.privateKey {string} - Private key hex string.
- * @return {string} Signed raw transaction hex string.
+ * @param options.from {string} - The address the transaction is send from.
+ * @param options.nonce {string|number} - This allows to overwrite your own pending transactions that use the same nonce.
+ * @param options.gasPrice {string|number} - The gasPrice used for each paid gas.
+ * @param options.gas {string|number|BigNumber} - The gas provided for the transaction execution. It will return unused gas.
+ * @param [options.to] {string} - The address the transaction is directed to.
+ * @param [options.value] {string|number|BigNumber} - the value sent with this transaction
+ * @param [options.data=''] {string|Buffer} - The compiled code of a contract OR the hash of the invoked method signature and encoded parameters.
+ * @return {object} Formatted send transaction options object.
  */
-function Tx({ nonce = 0, gasPrice = 1, gasLimit = MAX_TX_GAS, to = null, value = 0, data = '', privateKey }) {
-  const array = [
-    Number(nonce),
-    Drip(gasPrice),
-    Number(gasLimit),
-    to ? Address(to) : Hex(to),
-    Drip(value),
-    data,
-  ].map(Hex.toBuffer);
+function SendObject({ from, nonce, gasPrice, gas, to, value, data }) {
+  return {
+    from: Address(from),
+    nonce: Hex(nonce),
+    gasPrice: Drip(gasPrice),
+    gas: Hex(gas),
+    to: to === undefined ? undefined : Address(to),
+    value: value === undefined ? undefined : Drip(value),
+    data: data === undefined ? Hex('') : Hex(data),
+  };
+}
 
-  const { r, s, v } = ecsign(rlpEncode(array), Hex.toBuffer(PrivateKey(privateKey)));
-  const buffer = rlpEncode([...array, Hex.toBuffer(v), r, s]);
-  return Hex(buffer);
+/**
+ * @param options {object}
+ * @param [options.from] {string} - The address the transaction is sent from.
+ * @param [options.nonce] {string|number} - The caller nonce (transaction count).
+ * @param [options.gasPrice] {string|number} - The gasPrice used for each paid gas.
+ * @param [options.gas] {string|number|BigNumber} - The gas provided for the transaction execution. `call` consumes zero gas, but this parameter may be needed by some executions.
+ * @param options.to {string} - The address the transaction is directed to.
+ * @param [options.value] {string|number|BigNumber} - Integer of the value sent with this transaction.
+ * @param [options.data] {string|Buffer} - Hash of the method signature and encoded parameters.
+ * @return {object} Formatted call contract options object.
+ */
+function CallObject({ from, nonce, gasPrice, gas, to, value, data }) {
+  return {
+    from: from === undefined ? undefined : Address(from),
+    nonce: nonce === undefined ? undefined : Hex(nonce),
+    gasPrice: gasPrice === undefined ? undefined : Drip(gasPrice),
+    gas: gas === undefined ? undefined : Hex(gas),
+    to: Address(to),
+    value: value === undefined ? undefined : Drip(value),
+    data: data === undefined ? undefined : Hex(data),
+  };
 }
 
 module.exports = {
@@ -313,5 +243,6 @@ module.exports = {
   Epoch,
   BlockHash,
   TxHash,
-  Tx,
+  SendObject,
+  CallObject,
 };

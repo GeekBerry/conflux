@@ -3,9 +3,25 @@ const rlp = require('rlp');
 const keccak = require('keccak');
 const scryptJs = require('scrypt.js');
 const secp256k1 = require('secp256k1');
-const elliptic = require('elliptic');
 
-const secp256k1ec = new elliptic.ec('secp256k1');
+// ----------------------------------------------------------------------------
+/**
+ * keccak 256
+ *
+ * @param buffer {Buffer}
+ * @return {Buffer}
+ */
+function sha3(buffer) {
+  return keccak('keccak256').update(buffer).digest();
+}
+
+/**
+ * @param array {Buffer[]}
+ * @return {Buffer}
+ */
+function rlpEncode(array) {
+  return rlp.encode(array);
+}
 
 // ----------------------------------------------------------------------------
 /**
@@ -21,50 +37,46 @@ function randomBuffer(size) {
 }
 
 /**
- * @param array {Buffer[]}
+ * @param entropy {Buffer}
  * @return {Buffer}
  */
-function rlpEncode(array) {
-  return rlp.encode(array);
+function randomPrivateKey(entropy = randomBuffer(32)) {
+  if (!(Buffer.isBuffer(entropy) && entropy.length === 32)) {
+    throw new Error(`entropy must be 32 length Buffer, got "${typeof entropy}"`);
+  }
+
+  const inner = sha3(Buffer.concat([randomBuffer(32), entropy]));
+  const middle = Buffer.concat([randomBuffer(32), inner, randomBuffer(32)]);
+  return sha3(middle);
 }
 
 /**
- * keccak 256
- *
- * @param buffer {Buffer}
+ * @param publicKey {Buffer}
  * @return {Buffer}
  */
-function sha3(buffer) {
-  return keccak('keccak256').update(buffer).digest();
+function publicKeyToAddress(publicKey) {
+  return sha3(publicKey).slice(-20);
 }
 
 /**
- * @param key {Buffer}
- * @param iv {Buffer}
- * @param buffer {Buffer}
+ * @param privateKey {Buffer}
  * @return {Buffer}
  */
-function cipheriv(key, iv, buffer) {
-  return crypto.createCipheriv('aes-128-ctr', key, iv).update(buffer);
+function privateKeyToAddress(privateKey) {
+  const publicKey = secp256k1.publicKeyCreate(privateKey, false).slice(1);
+  return publicKeyToAddress(publicKey);
 }
 
 /**
- * @param key {Buffer}
- * @param iv {Buffer}
- * @param buffer {Buffer}
- * @return {Buffer}
+ * @param hash {Buffer}
+ * @param privateKey {Buffer}
+ * @return {object}
+ * - r {Buffer}
+ * - s {Buffer}
+ * - v {number}
  */
-function decipheriv(key, iv, buffer) {
-  return crypto.createDecipheriv('aes-128-ctr', key, iv).update(buffer);
-}
-
-/**
- * @param massageBuffer {Buffer}
- * @param privateBuffer {Buffer}
- * @return {{r: Buffer, s: Buffer, v: number}}
- */
-function ecsign(massageBuffer, privateBuffer) {
-  const sig = secp256k1.sign(sha3(massageBuffer), privateBuffer);
+function ecdsaSign(hash, privateKey) {
+  const sig = secp256k1.sign(hash, privateKey);
   return {
     r: sig.signature.slice(0, 32),
     s: sig.signature.slice(32, 64),
@@ -73,21 +85,65 @@ function ecsign(massageBuffer, privateBuffer) {
 }
 
 /**
- * @param key {Buffer}
- * @param salt {Buffer}
- * @return {Buffer}
+ * @param hash {Buffer}
+ * @param r {Buffer}
+ * @param s {Buffer}
+ * @param v {number}
+ * @return {Buffer} publicKey
  */
-function scrypt32(key, salt) {
-  return scryptJs(key, salt, 8192, 8, 1, 32);
+function ecdsaRecover(hash, { r, s, v }) {
+  const senderPublic = secp256k1.recover(hash, Buffer.concat([r, s]), v);
+  return secp256k1.publicKeyConvert(senderPublic, false).slice(1);
 }
 
+// ----------------------------------------------------------------------------
+/**
+ * @param key {Buffer}
+ * @param password {Buffer}
+ * @return {object} Encrypt info
+ * - salt {Buffer}
+ * - iv {Buffer}
+ * - cipher {Buffer}
+ * - mac {Buffer}
+ */
+function encrypt(key, password) {
+  const salt = randomBuffer(32);
+  const iv = randomBuffer(16);
+  const derived = scryptJs(password, salt, 8192, 8, 1, 32);
+  const cipher = crypto.createCipheriv('aes-128-ctr', derived.slice(0, 16), iv).update(key);
+  const mac = sha3(Buffer.concat([derived.slice(16, 32), cipher]));
+  return { salt, iv, cipher, mac };
+}
+
+/**
+ * @param options
+ * @param options.salt {Buffer}
+ * @param options.iv {Buffer}
+ * @param options.cipher {Buffer}
+ * @param options.mac {Buffer}
+ * @param password {Buffer}
+ * @return {Buffer}
+ */
+function decrypt({ salt, iv, cipher, mac }, password) {
+  const derived = scryptJs(password, salt, 8192, 8, 1, 32);
+  if (!sha3(Buffer.concat([derived.slice(16, 32), cipher])).equals(mac)) {
+    throw new Error('Key derivation failed, possibly wrong password!');
+  }
+  return crypto.createDecipheriv('aes-128-ctr', derived.slice(0, 16), iv).update(cipher);
+}
+
+// ----------------------------------------------------------------------------
 module.exports = {
-  randomBuffer,
-  rlpEncode,
-  secp256k1ec,
   sha3,
-  cipheriv,
-  decipheriv,
-  ecsign,
-  scrypt32,
+  rlpEncode,
+
+  randomBuffer,
+  randomPrivateKey,
+  publicKeyToAddress,
+  privateKeyToAddress,
+  ecdsaSign,
+  ecdsaRecover,
+
+  encrypt,
+  decrypt,
 };
