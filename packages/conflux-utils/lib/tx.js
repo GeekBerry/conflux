@@ -1,12 +1,58 @@
 const { Hex, Address, PrivateKey, Drip } = require('./type');
 const { rlpEncode, sha3, ecdsaSign, ecdsaRecover, publicKeyToAddress } = require('./sign');
 
-// const MAX_TX_GAS = 100000000;
-// const MIN_TX_GAS = 21000;
+function throwError(...args) {
+  throw new Error(...args);
+}
 
 class Transaction {
   /**
-   * Signs a transaction. This account needs to be unlocked.
+   * @param options {object}
+   * @param options.from {string} - The address the transaction is send from.
+   * @param options.nonce {string|number} - This allows to overwrite your own pending transactions that use the same nonce.
+   * @param options.gasPrice {string|number} - The gasPrice used for each paid gas.
+   * @param options.gas {string|number|BigNumber} - The gas provided for the transaction execution. It will return unused gas.
+   * @param [options.to] {string} - The address the transaction is directed to.
+   * @param [options.value] {string|number|BigNumber} - the value sent with this transaction
+   * @param [options.data=''] {string|Buffer} - The compiled code of a contract OR the hash of the invoked method signature and encoded parameters.
+   * @return {object} Formatted send transaction options object.
+   */
+  static sendOptions({ from, nonce, gasPrice, gas, to, value, data }) {
+    return {
+      from: from === undefined ? throwError('`from` is required and should match `Address`') : Address(from),
+      nonce: nonce === undefined ? throwError('`nonce` is required and should match `Hex`') : Hex(nonce),
+      gasPrice: gasPrice === undefined ? throwError('`gasPrice` is required and should match `Drip`') : Drip(gasPrice),
+      gas: gas === undefined ? throwError('`gas` is required and should match `Hex`') : Hex(gas),
+      to: to === undefined ? undefined : Address(to),
+      value: value === undefined ? undefined : Drip(value),
+      data: data === undefined ? Hex('') : Hex(data),
+    };
+  }
+
+  /**
+   * @param options {object}
+   * @param [options.from] {string} - The address the transaction is sent from.
+   * @param [options.nonce] {string|number} - The caller nonce (transaction count).
+   * @param [options.gasPrice] {string|number} - The gasPrice used for each paid gas.
+   * @param [options.gas] {string|number|BigNumber} - The gas provided for the transaction execution. `call` consumes zero gas, but this parameter may be needed by some executions.
+   * @param options.to {string} - The address the transaction is directed to.
+   * @param [options.value] {string|number|BigNumber} - Integer of the value sent with this transaction.
+   * @param [options.data] {string|Buffer} - Hash of the method signature and encoded parameters.
+   * @return {object} Formatted call contract options object.
+   */
+  static callOptions({ from, nonce, gasPrice, gas, to, value, data }) {
+    return {
+      from: from === undefined ? undefined : Address(from),
+      nonce: nonce === undefined ? undefined : Hex(nonce),
+      gasPrice: gasPrice === undefined ? undefined : Drip(gasPrice),
+      gas: gas === undefined ? undefined : Hex(gas),
+      to: to === undefined ? throwError('`to` is required and should match `Address`') : Address(to),
+      value: value === undefined ? undefined : Drip(value),
+      data: data === undefined ? undefined : Hex(data),
+    };
+  }
+
+  /**
    *
    * @param options {object}
    * @param options.nonce {string|number} - This allows to overwrite your own pending transactions that use the same nonce.
@@ -18,18 +64,30 @@ class Transaction {
    * @param [options.r=null] {string|Buffer} - ECDSA signature r
    * @param [options.s=null] {string|Buffer} - ECDSA signature s
    * @param [options.v=null] {string|number} - ECDSA recovery id
+   * @return {{}}
+   */
+  static rawOptions({ nonce, gasPrice, gas, to, value, data, r, s, v }) {
+    return {
+      nonce: nonce === undefined ? throwError('`nonce` is required and should match `Hex`') : Hex(nonce),
+      gasPrice: gasPrice === undefined ? throwError('`gasPrice` is required and should match `Drip`') : Drip(gasPrice),
+      gas: gas === undefined ? throwError('`gas` is required and should match `Hex`') : Hex(gas),
+      to: to === undefined ? Hex(null) : Address(to),
+      value: value === undefined ? Drip(0) : Drip(value),
+      data: data === undefined ? Hex('') : Hex(data),
+      r: r === undefined ? Hex(null) : Hex(r),
+      s: s === undefined ? Hex(null) : Hex(s),
+      v: v === undefined ? Hex(null) : Hex(v),
+    };
+  }
+
+  /**
+   * Signs a transaction. This account needs to be unlocked.
+   *
+   * @param options {object} - See `Transaction.rawOptions`
    * @return {Transaction}
    */
-  constructor({ nonce, gasPrice, gas, to, value, data, r, s, v }) {
-    this.nonce = Hex(nonce);
-    this.gasPrice = Drip(gasPrice);
-    this.gas = Hex(gas);
-    this.to = to === undefined ? Hex(null) : Address(to);
-    this.value = value === undefined ? Drip(0) : Drip(value);
-    this.data = data === undefined ? Hex('') : Hex(data);
-    this.r = r === undefined ? Hex(null) : Hex(r);
-    this.s = s === undefined ? Hex(null) : Hex(s);
-    this.v = v === undefined ? Hex(null) : Hex(v);
+  constructor(options) {
+    Object.assign(this, Transaction.rawOptions(options));
   }
 
   /**
@@ -86,7 +144,7 @@ class Transaction {
    *
    * @return {string}
    */
-  toString() {
+  serialize() {
     return Hex(this.encode(true));
   }
 }

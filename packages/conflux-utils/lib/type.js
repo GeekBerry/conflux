@@ -189,52 +189,6 @@ function TxHash(value) {
   return string;
 }
 
-/**
- * @param options {object}
- * @param options.from {string} - The address the transaction is send from.
- * @param options.nonce {string|number} - This allows to overwrite your own pending transactions that use the same nonce.
- * @param options.gasPrice {string|number} - The gasPrice used for each paid gas.
- * @param options.gas {string|number|BigNumber} - The gas provided for the transaction execution. It will return unused gas.
- * @param [options.to] {string} - The address the transaction is directed to.
- * @param [options.value] {string|number|BigNumber} - the value sent with this transaction
- * @param [options.data=''] {string|Buffer} - The compiled code of a contract OR the hash of the invoked method signature and encoded parameters.
- * @return {object} Formatted send transaction options object.
- */
-function SendObject({ from, nonce, gasPrice, gas, to, value, data }) {
-  return {
-    from: Address(from),
-    nonce: Hex(nonce),
-    gasPrice: Drip(gasPrice),
-    gas: Hex(gas),
-    to: to === undefined ? undefined : Address(to),
-    value: value === undefined ? undefined : Drip(value),
-    data: data === undefined ? Hex('') : Hex(data),
-  };
-}
-
-/**
- * @param options {object}
- * @param [options.from] {string} - The address the transaction is sent from.
- * @param [options.nonce] {string|number} - The caller nonce (transaction count).
- * @param [options.gasPrice] {string|number} - The gasPrice used for each paid gas.
- * @param [options.gas] {string|number|BigNumber} - The gas provided for the transaction execution. `call` consumes zero gas, but this parameter may be needed by some executions.
- * @param options.to {string} - The address the transaction is directed to.
- * @param [options.value] {string|number|BigNumber} - Integer of the value sent with this transaction.
- * @param [options.data] {string|Buffer} - Hash of the method signature and encoded parameters.
- * @return {object} Formatted call contract options object.
- */
-function CallObject({ from, nonce, gasPrice, gas, to, value, data }) {
-  return {
-    from: from === undefined ? undefined : Address(from),
-    nonce: nonce === undefined ? undefined : Hex(nonce),
-    gasPrice: gasPrice === undefined ? undefined : Drip(gasPrice),
-    gas: gas === undefined ? undefined : Hex(gas),
-    to: Address(to),
-    value: value === undefined ? undefined : Drip(value),
-    data: data === undefined ? undefined : Hex(data),
-  };
-}
-
 module.exports = {
   Hex,
   Drip,
@@ -243,6 +197,4 @@ module.exports = {
   Epoch,
   BlockHash,
   TxHash,
-  SendObject,
-  CallObject,
 };

@@ -1,9 +1,10 @@
 const { HttpProvider } = require('conflux-provider');
-const { Address, Epoch, BlockHash, TxHash, SendObject, CallObject } = require('conflux-utils/lib/type');
+const { Address, Epoch, BlockHash, TxHash } = require('conflux-utils/lib/type');
+const Transaction = require('conflux-utils/lib/tx');
 
 const parse = require('./parse');
-const Wallet = require('./wallet');
 const Contract = require('./contract');
+const Account = require('./account');
 
 /**
  * A client of conflux node.
@@ -18,11 +19,19 @@ class Client {
    */
   constructor(url, options) {
     this.provider = new HttpProvider(url, options); // TODO
-    this.wallet = new Wallet(this);
+    // this.wallet = new Wallet(this);
 
     this.defaultEpoch = Epoch.LATEST_STATE;
     this.defaultGasPrice = 100; // TODO undefined
     this.defaultGas = 1000000; // TODO undefined
+  }
+
+  Account(privateKey) {
+    return new Account(privateKey);
+  }
+
+  Contract(options) {
+    return new Contract(this, options);
   }
 
   /**
@@ -402,7 +411,9 @@ class Client {
   /**
    * Creates new message call transaction or a contract creation, if the data field contains code.
    *
-   * @param options {object} - See `CallObject`
+   * > FIXME: rpc `cfx_sendTransaction` not implement yet.
+   *
+   * @param options {object} - See `Transaction.callOptions`
    * @return {Promise<string>} The transaction hash, or the zero hash if the transaction is not yet available.
    *
    * @example
@@ -417,11 +428,15 @@ class Client {
       options.gas = this.defaultGas;
     }
 
-    const account = this.wallet.get(options.from);
-    if (account) { // sign by local wallet
-      return account.sendTransaction(options);
+    if (options.nonce === undefined) {
+      options.nonce = await this.getTransactionCount(options.from);
+    }
+
+    if (options.from instanceof Wallet.Account) { // sign by local
+      const tx = options.from.signTransaction(options);
+      return this.sendRawTransaction(tx.serialize());
     } else { // sign by remote
-      return this.provider.call('cfx_sendTransaction', SendObject(options));
+      return this.provider.call('cfx_sendTransaction', Transaction.sendOptions(options));
     }
   }
 
@@ -459,7 +474,7 @@ class Client {
    * Executes a message call transaction, which is directly executed in the VM of the node,
    * but never mined into the block chain.
    *
-   * @param options {object} - See `CallObject`
+   * @param options {object} - See `Transaction.callOptions`
    * @param [epoch=this.defaultEpoch] {string|number} - The end epoch to execute call of.
    * @return {Promise<string>} Hex bytes the contract method return.
    */
@@ -472,17 +487,17 @@ class Client {
       options.gas = this.defaultGas;
     }
 
-    let result = await this.provider.call('cfx_call', CallObject(options), Epoch(epoch));
-    if (options.data instanceof Contract.Called) {
-      result = options.data.parse(result);
+    if (options.from && options.nonce === undefined) {
+      options.nonce = await this.getTransactionCount(options.from);
     }
-    return result;
+
+    return this.provider.call('cfx_call', Transaction.callOptions(options), Epoch(epoch));
   }
 
   /**
    * Executes a message call or transaction and returns the amount of the gas used.
    *
-   * @param options {object} - See `CallObject`
+   * @param options {object} - See `Transaction.callOptions`
    * @return {Promise<number>} The used gas for the simulated call/transaction.
    */
   async estimateGas(options) {
@@ -494,7 +509,11 @@ class Client {
       options.gas = this.defaultGas;
     }
 
-    const result = await this.provider.call('cfx_estimateGas', CallObject(options));
+    if (options.from && options.nonce === undefined) {
+      options.nonce = await this.getTransactionCount(options.from);
+    }
+
+    const result = await this.provider.call('cfx_estimateGas', Transaction.callOptions(options));
     return parse.number(result);
   }
 }
