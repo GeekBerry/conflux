@@ -111,6 +111,26 @@ Drip.fromCFX = function (value) {
   return Drip(number);
 };
 
+/**
+ * Get `GDrip` from Drip.
+ *
+ * @param value {string|number|BigNumber}
+ * @return {BigNumber}
+ */
+Drip.toGrip = function (value) {
+  return BigNumber(value).div(1e9);
+};
+
+/**
+ * Get `CFX` from Drip.
+ *
+ * @param value {string|number|BigNumber}
+ * @return {BigNumber}
+ */
+Drip.toCFX = function (value) {
+  return BigNumber(value).div(1e9).div(1e9); // XXX: 1e18 > Number.MAX_SAFE_INTEGER > 1e9
+};
+
 // ---------------------------------- PrivateKey ------------------------------
 /**
  * @memberOf type

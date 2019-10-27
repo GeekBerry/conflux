@@ -5,6 +5,7 @@ const Transaction = require('conflux-utils/lib/tx');
 const parse = require('./parse');
 const Contract = require('./contract');
 const Account = require('./account');
+const Wallet = require('./wallet');
 
 /**
  * A client of conflux node.
@@ -15,20 +16,23 @@ class Client {
    * @param [options] - Provider constructor options.
    *
    * @example
-   * > const cfx = new Client('http://testnet-jsonrpc.conflux-chain.org:12537');
+   * > const client = new Client('http://testnet-jsonrpc.conflux-chain.org:12537');
    */
-  constructor(url, options) {
-    this.provider = new HttpProvider(url, options); // TODO
-    // this.wallet = new Wallet(this);
+  constructor(url, {
+    defaultEpoch = Epoch.LATEST_STATE,
+    defaultGasPrice = 100, // TODO undefined
+    defaultGas = 1000000,  // TODO undefined
+    ...rest
+  }) {
+    this.provider = new HttpProvider(url, rest); // TODO
+    this.wallet = new Wallet(this);
 
-    this.defaultEpoch = Epoch.LATEST_STATE;
-    this.defaultGasPrice = 100; // TODO undefined
-    this.defaultGas = 1000000; // TODO undefined
+    this.defaultEpoch = defaultEpoch;
+    this.defaultGasPrice = defaultGasPrice;
+    this.defaultGas = defaultGas;
   }
 
-  Account(privateKey) {
-    return new Account(privateKey);
-  }
+  // TODO: setProvider();
 
   Contract(options) {
     return new Contract(this, options);
@@ -38,17 +42,20 @@ class Client {
    * close client connection.
    *
    * @example
-   * > cfx.close();
+   * > client.close();
    */
-  close() {}
+  close() {
+    this.provider.close();
+  }
 
+  // --------------------------------------------------------------------------
   /**
    * Returns the current gas price oracle. The gas price is determined by the last few blocks median gas price.
    *
    * @return {Promise<number>} Gas price in drip.
    *
    * @example
-   * > await cfx.gasPrice();
+   * > await client.gasPrice();
    0
    */
   async gasPrice() {
@@ -62,7 +69,7 @@ class Client {
    * @return {Promise<number>} Epoch number
    *
    * @example
-   * > await cfx.epochNumber();
+   * > await client.epochNumber();
    200109
    */
   async epochNumber() {
@@ -81,7 +88,7 @@ class Client {
    * @return {Promise<array>} Array of log objects.
    *
    * @example
-   * > await cfx.getPastLogs({
+   * > await client.getPastLogs({
       fromEpoch: 0,
       toEpoch: 'latest_mined',
       address: '0x169a10a431130B2F4853294A4a966803668af385'
@@ -105,14 +112,14 @@ class Client {
    * @return {Promise<BigNumber>} Address balance number in drip.
    *
    * @example
-   * > let balance = await cfx.getBalance("0x407d73d8a49eeb85d32cf465507dd71d507100c1");
+   * > let balance = await client.getBalance("0x407d73d8a49eeb85d32cf465507dd71d507100c1");
    * > balance;
    BigNumber { s: 1, e: 18, c: [ 19279, 96239115917632 ] }
 
    * > balance.toString(10);
    1927996239115917632
 
-   * > balance = await cfx.getBalance("0x407d73d8a49eeb85d32cf465507dd71d507100c1", 0);
+   * > balance = await client.getBalance("0x407d73d8a49eeb85d32cf465507dd71d507100c1", 0);
    * > balance.toString(10);
    0
    */
@@ -129,10 +136,10 @@ class Client {
    * @return {Promise<number>}
    *
    * @example
-   * > await cfx.getTransactionCount("0x407d73d8a49eeb85d32cf465507dd71d507100c1");
+   * > await client.getTransactionCount("0x407d73d8a49eeb85d32cf465507dd71d507100c1");
    61
 
-   * > await cfx.getTransactionCount("0x407d73d8a49eeb85d32cf465507dd71d507100c1", Epoch.EARLIEST);
+   * > await client.getTransactionCount("0x407d73d8a49eeb85d32cf465507dd71d507100c1", Epoch.EARLIEST);
    0
    */
   async getTransactionCount(address, epoch = this.defaultEpoch) {
@@ -147,7 +154,7 @@ class Client {
    * @return {Promise<string>} Block hash
    *
    * @example
-   * > await cfx.getBestBlockHash();
+   * > await client.getBestBlockHash();
    "0x7274f450ada5eb5bd9b83640ec2a42f76badf948be96be688df34d97ffc8c68d"
    */
   getBestBlockHash() {
@@ -161,10 +168,10 @@ class Client {
    * @return {Promise<string[]>} Block hash array, last one is the pivot block hash of this epoch.
    *
    * @example
-   * > await cfx.getBlocksByEpoch(Epoch.EARLIEST); // same as `cfx.getBlocksByEpoch(0)`
+   * > await client.getBlocksByEpoch(Epoch.EARLIEST); // same as `client.getBlocksByEpoch(0)`
    ['0x2da120ad267319c181b12136f9e36be9fba59e0d818f6cc789f04ee937b4f593']
 
-   * > await cfx.getBlocksByEpoch(449);
+   * > await client.getBlocksByEpoch(449);
    [
    '0x3d8b71208f81fb823f4eec5eaf2b0ec6b1457d381615eff2fbe24605ea333c39',
    '0x59339ff28bc235cceac9fa588ebafcbf61316e6a8c86c7a1d7239b9445d98e40'
@@ -202,7 +209,7 @@ class Client {
    - `object` deferredStateRootWithAux: Information of deferred state root
 
    * @example
-   * > await cfx.getBlockByHash('0x59339ff28bc235cceac9fa588ebafcbf61316e6a8c86c7a1d7239b9445d98e40');
+   * > await client.getBlockByHash('0x59339ff28bc235cceac9fa588ebafcbf61316e6a8c86c7a1d7239b9445d98e40');
    {
     "miner": "0x0000000000000000000000000000000000000015",
     "hash": "0x59339ff28bc235cceac9fa588ebafcbf61316e6a8c86c7a1d7239b9445d98e40",
@@ -241,7 +248,7 @@ class Client {
    }
 
    * @example
-   * > await cfx.getBlockByHash('0x59339ff28bc235cceac9fa588ebafcbf61316e6a8c86c7a1d7239b9445d98e40', true);
+   * > await client.getBlockByHash('0x59339ff28bc235cceac9fa588ebafcbf61316e6a8c86c7a1d7239b9445d98e40', true);
    {
     "hash": "0x59339ff28bc235cceac9fa588ebafcbf61316e6a8c86c7a1d7239b9445d98e40",
     "transactions": [
@@ -279,7 +286,7 @@ class Client {
    * @return {Promise<object|null>} The block info (same as `getBlockByHash`).
    *
    * @example
-   * > await cfx.getBlockByEpochNumber(449);
+   * > await client.getBlockByEpochNumber(449);
    {
      hash: '0x59339ff28bc235cceac9fa588ebafcbf61316e6a8c86c7a1d7239b9445d98e40',
      ...
@@ -299,7 +306,7 @@ class Client {
    * @return {Promise<object>} The block info (same as `getBlockByHash`).
    *
    * @example
-   * > await cfx.getBlockByHashWithPivotAssumption(
+   * > await client.getBlockByHashWithPivotAssumption(
    '0x3d8b71208f81fb823f4eec5eaf2b0ec6b1457d381615eff2fbe24605ea333c39',
    '0x59339ff28bc235cceac9fa588ebafcbf61316e6a8c86c7a1d7239b9445d98e40'
    449,
@@ -339,7 +346,7 @@ class Client {
    - `string` v: ECDSA recovery id
    *
    * @example
-   * > await cfx.getTransactionByHash('0xbe007c3eca92d01f3917f33ae983f40681182cf618defe75f490a65aac016914');
+   * > await client.getTransactionByHash('0xbe007c3eca92d01f3917f33ae983f40681182cf618defe75f490a65aac016914');
    {
       "blockHash": "0x59339ff28bc235cceac9fa588ebafcbf61316e6a8c86c7a1d7239b9445d98e40",
       "transactionIndex": 0,
@@ -387,7 +394,7 @@ class Client {
    - `string` logsBloom: Log bloom.
 
    * @example
-   * > await cfx.getTransactionReceipt('0xbe007c3eca92d01f3917f33ae983f40681182cf618defe75f490a65aac016914');
+   * > await client.getTransactionReceipt('0xbe007c3eca92d01f3917f33ae983f40681182cf618defe75f490a65aac016914');
    {
     "outcomeStatus": 0,
     "stateRoot": "0x3854f64be6c124dffd0ddca57270846f0f43a119ea681b4e5d022ade537d9f07",
@@ -432,7 +439,7 @@ class Client {
       options.nonce = await this.getTransactionCount(options.from);
     }
 
-    if (options.from instanceof Wallet.Account) { // sign by local
+    if (options.from instanceof Account) { // sign by local
       const tx = options.from.signTransaction(options);
       return this.sendRawTransaction(tx.serialize());
     } else { // sign by remote
@@ -447,7 +454,7 @@ class Client {
    * @return {Promise<string>} Transaction hash.
    *
    * @example
-   * > await cfx.sendRawTransaction('0xf85f800382520894bbd9e9b...');
+   * > await client.sendRawTransaction('0xf85f800382520894bbd9e9b...');
    "0xbe007c3eca92d01f3917f33ae983f40681182cf618defe75f490a65aac016914"
    */
   sendRawTransaction(hex) {
@@ -463,7 +470,7 @@ class Client {
    * @return {Promise<string>} Code hex string
    *
    * @example
-   * > await cfx.getCode('0xb385b84f08161f92a195953b980c8939679e906a');
+   * > await client.getCode('0xb385b84f08161f92a195953b980c8939679e906a');
    "0x6080604052348015600f57600080fd5b506004361060325760003560e01c806306661abd1460375780638..."
    */
   getCode(address, epoch = this.defaultEpoch) {

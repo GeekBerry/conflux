@@ -57,6 +57,8 @@ class HttpProvider {
     }
     return result;
   }
+
+  close() {}
 }
 
 module.exports = HttpProvider;

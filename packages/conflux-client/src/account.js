@@ -1,13 +1,9 @@
+const lodash = require('lodash');
 const { Hex, PrivateKey, Address } = require('conflux-utils/lib/type');
-const { privateKeyToAddress, randomPrivateKey } = require('conflux-utils/lib/sign');
+const { privateKeyToAddress, encrypt, decrypt } = require('conflux-utils/lib/sign');
 const Transaction = require('conflux-utils/lib/tx');
 
 class Account {
-  static create(entropy) {
-    const privateKeyBuffer = randomPrivateKey(entropy === undefined ? undefined : Hex.toBuffer(entropy));
-    return new this(privateKeyBuffer);
-  }
-
   /**
    * @param privateKey {string|Buffer}
    * @return {Account}
@@ -18,8 +14,27 @@ class Account {
   }
 
   /**
+   * @param info {object}
+   * @param password {string}
+   * @return {Account}
+   */
+  static decrypt(info, password) {
+    const privateKeyBuffer = decrypt(lodash.mapValues(info, Hex.toBuffer), Buffer.from(password));
+    return new this(privateKeyBuffer);
+  }
+
+  /**
+   * @param password {string}
+   * @return {object}
+   */
+  encrypt(password) {
+    const info = encrypt(Hex.toBuffer(this.privateKey), Buffer.from(password));
+    return lodash.mapValues(info, Hex);
+  }
+
+  /**
    * @param options {object} - See 'Transaction'
-   * @return {Promise<Transaction>}
+   * @return {Transaction}
    */
   signTransaction(options) {
     const tx = new Transaction(options);
@@ -30,6 +45,9 @@ class Account {
     return tx;
   }
 
+  /**
+   * @return {string} Account address as string.
+   */
   toString() {
     return this.address;
   }

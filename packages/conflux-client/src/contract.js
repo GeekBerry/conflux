@@ -3,18 +3,19 @@ const web3Abi = require('web3-eth-abi');
 const { defaultAbiCoder: ethAbi } = require('ethers/utils/abi-coder');
 
 class Contract {
-  constructor(cfx, { abi: contractABI, address, code }) {
-    this.address = address;
+  constructor(client, { abi: contractABI, address, code }) {
+    this.abi = contractABI; // Can not create a method named `abi` in solidity is a `Warning`.
+    this.address = address; // Can not create a method named `address` in solidity is a `ParserError`
 
     for (const methodABI of contractABI) {
       switch (methodABI.type) {
         case 'constructor':
           // cover this.constructor
-          this['constructor'] = new Constructor(cfx, { contract: this, abi: methodABI, code });
+          this['constructor'] = new Constructor(client, { contract: this, abi: methodABI, code });
           break;
 
         case 'function':
-          this[methodABI.name] = new Method(cfx, { contract: this, abi: methodABI });
+          this[methodABI.name] = new Method(client, { contract: this, abi: methodABI });
           break;
 
         default:
@@ -25,9 +26,9 @@ class Contract {
 }
 
 class Method extends Function {
-  constructor(cfx, { contract, abi }) {
+  constructor(client, { contract, abi }) {
     super();
-    this.cfx = cfx;
+    this.client = client;
     this.contract = contract;
     this.abi = abi;
     return new Proxy(this, this.constructor);
@@ -59,8 +60,8 @@ class Method extends Function {
 }
 
 class Constructor extends Method {
-  constructor(cfx, { code, ...rest }) {
-    super(cfx, rest);
+  constructor(client, { code, ...rest }) {
+    super(client, rest);
     this.code = code;
   }
 
@@ -72,7 +73,7 @@ class Constructor extends Method {
 
   encode(params) {
     if (!this.code) {
-      throw new Error('contract.constructor.code is empty')
+      throw new Error('contract.constructor.code is empty');
     }
     return this.code + web3Abi.encodeParameters(this.abi.inputs, params).replace('0x', '');
   }
@@ -90,7 +91,7 @@ class Called {
   }
 
   sendTransaction(options) {
-    return this.method.cfx.sendTransaction({
+    return this.method.client.sendTransaction({
       to: this.to,
       data: this.data,
       ...options,
@@ -98,7 +99,7 @@ class Called {
   }
 
   estimateGas(options) {
-    return this.method.cfx.estimateGas({
+    return this.method.client.estimateGas({
       to: this.to,
       data: this.data,
       ...options,
@@ -106,7 +107,7 @@ class Called {
   };
 
   async call(options, epoch) {
-    let result = await this.method.cfx.call(
+    let result = await this.method.client.call(
       {
         to: this.to,
         data: this.data,
@@ -117,6 +118,12 @@ class Called {
     return this.method.decode(result);
   };
 
+  /**
+   * Override `then()` as thenable of `call()`
+   * @param resolve
+   * @param reject
+   * @return {Promise<void>}
+   */
   async then(resolve, reject) {
     try {
       const result = await this.call();
