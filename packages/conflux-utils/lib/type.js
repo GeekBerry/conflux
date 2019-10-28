@@ -17,15 +17,16 @@ function Hex(value) {
   }
 
   if (lodash.isString(value)) {
-    let string = value.toLowerCase();
+    if (Hex.isHex(value)) { // In order not to copy hex string in most case.
+      return value;
+    }
 
+    let string = value.toLowerCase();
     string = string.startsWith('0x') ? string : `0x${string}`;
     string = string.length % 2 ? `0x0${string.substring(2)}` : string;
-
     if (!Hex.isHex(string)) {
       throw new Error(`"${value}" do not match hex string`);
     }
-
     return string;
   }
 

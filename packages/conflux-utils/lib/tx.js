@@ -19,13 +19,13 @@ class Transaction {
    */
   static sendOptions({ from, nonce, gasPrice, gas, to, value, data }) {
     return {
-      from: from === undefined ? throwError('`from` is required and should match `Address`') : Address(from),
-      nonce: nonce === undefined ? throwError('`nonce` is required and should match `Hex`') : Hex(nonce),
-      gasPrice: gasPrice === undefined ? throwError('`gasPrice` is required and should match `Drip`') : Drip(gasPrice),
-      gas: gas === undefined ? throwError('`gas` is required and should match `Hex`') : Hex(gas),
-      to: to === undefined ? undefined : Address(to),
-      value: value === undefined ? undefined : Drip(value),
-      data: data === undefined ? Hex('') : Hex(data),
+      from: from !== undefined ? Address(from) : throwError('`from` is required and should match `Address`'),
+      nonce: nonce !== undefined ? Hex(nonce) : throwError('`nonce` is required and should match `Hex`'),
+      gasPrice: gasPrice !== undefined ? Drip(gasPrice) : throwError('`gasPrice` is required and should match `Drip`'),
+      gas: gas !== undefined ? Hex(gas) : throwError('`gas` is required and should match `Hex`'),
+      to: to !== undefined ? Address(to) : undefined,
+      value: value !== undefined ? Drip(value) : undefined,
+      data: data !== undefined ? Hex(data) : Hex(''),
     };
   }
 
@@ -42,13 +42,13 @@ class Transaction {
    */
   static callOptions({ from, nonce, gasPrice, gas, to, value, data }) {
     return {
-      from: from === undefined ? undefined : Address(from),
-      nonce: nonce === undefined ? undefined : Hex(nonce),
-      gasPrice: gasPrice === undefined ? undefined : Drip(gasPrice),
-      gas: gas === undefined ? undefined : Hex(gas),
-      to: to === undefined ? throwError('`to` is required and should match `Address`') : Address(to),
-      value: value === undefined ? undefined : Drip(value),
-      data: data === undefined ? undefined : Hex(data),
+      from: from !== undefined ? Address(from) : undefined,
+      nonce: nonce !== undefined ? Hex(nonce) : undefined,
+      gasPrice: gasPrice !== undefined ? Drip(gasPrice) : undefined,
+      gas: gas !== undefined ? Hex(gas) : undefined,
+      to: to !== undefined ? Address(to) : throwError('`to` is required and should match `Address`'),
+      value: value !== undefined ? Drip(value) : undefined,
+      data: data !== undefined ? Hex(data) : undefined,
     };
   }
 
@@ -68,15 +68,15 @@ class Transaction {
    */
   static rawOptions({ nonce, gasPrice, gas, to, value, data, r, s, v }) {
     return {
-      nonce: nonce === undefined ? throwError('`nonce` is required and should match `Hex`') : Hex(nonce),
-      gasPrice: gasPrice === undefined ? throwError('`gasPrice` is required and should match `Drip`') : Drip(gasPrice),
-      gas: gas === undefined ? throwError('`gas` is required and should match `Hex`') : Hex(gas),
-      to: to === undefined ? Hex(null) : Address(to),
-      value: value === undefined ? Drip(0) : Drip(value),
-      data: data === undefined ? Hex('') : Hex(data),
-      r: r === undefined ? Hex(null) : Hex(r),
-      s: s === undefined ? Hex(null) : Hex(s),
-      v: v === undefined ? Hex(null) : Hex(v),
+      nonce: nonce !== undefined ? Hex(nonce) : throwError('`nonce` is required and should match `Hex`'),
+      gasPrice: gasPrice !== undefined ? Drip(gasPrice) : throwError('`gasPrice` is required and should match `Drip`'),
+      gas: gas !== undefined ? Hex(gas) : throwError('`gas` is required and should match `Hex`'),
+      to: to !== undefined ? Address(to) : Hex(null),
+      value: value !== undefined ? Drip(value) : Drip(0),
+      data: data !== undefined ? Hex(data) : Hex(''),
+      r: r !== undefined ? Hex(r) : undefined,
+      s: s !== undefined ? Hex(s) : undefined,
+      v: v !== undefined ? Hex(v) : undefined,
     };
   }
 
@@ -91,11 +91,22 @@ class Transaction {
   }
 
   /**
+   * @return {string|undefined}
+   */
+  get hash() {
+    try {
+      return Hex(sha3(this.encode(true)));
+    } catch (e) {
+      return undefined;
+    }
+  }
+
+  /**
    * @return {string|undefined} Hex string of sender address
    */
   get from() {
     try {
-      const publicKey = ecdsaRecover(this.hash(), {
+      const publicKey = ecdsaRecover(sha3(this.encode(false)), {
         r: Hex.toBuffer(this.r),
         s: Hex.toBuffer(this.s),
         v: Number(this.v),
@@ -112,19 +123,10 @@ class Transaction {
    * @param privateKey {string} - Private key hex string.
    */
   sign(privateKey) {
-    const { r, s, v } = ecdsaSign(this.hash(), Hex.toBuffer(PrivateKey(privateKey)));
+    const { r, s, v } = ecdsaSign(sha3(this.encode(false)), Hex.toBuffer(PrivateKey(privateKey)));
     this.r = Hex(r);
     this.s = Hex(s);
     this.v = Hex(v);
-  }
-
-  /**
-   * Computes a sha hash of the transaction.
-   *
-   * @return {Buffer}
-   */
-  hash() {
-    return sha3(this.encode());
   }
 
   /**
@@ -134,6 +136,15 @@ class Transaction {
   encode(includeSignature = false) {
     const raw = [this.nonce, this.gasPrice, this.gas, this.to, this.value, this.data];
     if (includeSignature) {
+      if (this.v === undefined) {
+        throwError('`v` is required and should match `Hex`');
+      }
+      if (this.r === undefined) {
+        throwError('`r` is required and should match `Hex`');
+      }
+      if (this.s === undefined) {
+        throwError('`s` is required and should match `Hex`');
+      }
       raw.push(this.v, this.r, this.s);
     }
     return rlpEncode(raw.map(Hex.toBuffer));
@@ -142,7 +153,7 @@ class Transaction {
   /**
    * Get the raw tx hex string.
    *
-   * @return {string}
+   * @return {Buffer}
    */
   serialize() {
     return Hex(this.encode(true));

@@ -1,11 +1,11 @@
 const { HttpProvider } = require('conflux-provider');
-const { Address, Epoch, BlockHash, TxHash } = require('conflux-utils/lib/type');
+const { Hex, Address, Epoch, BlockHash, TxHash } = require('conflux-utils/lib/type');
 const Transaction = require('conflux-utils/lib/tx');
 
 const parse = require('./parse');
 const Contract = require('./contract');
-const Account = require('./account');
 const Wallet = require('./wallet');
+const Subscribe = require('./subscribe');
 
 /**
  * A client of conflux node.
@@ -21,7 +21,7 @@ class Client {
   constructor(url, {
     defaultEpoch = Epoch.LATEST_STATE,
     defaultGasPrice = 100, // TODO undefined
-    defaultGas = 1000000,  // TODO undefined
+    defaultGas = 1000000, // TODO undefined
     ...rest
   }) {
     this.provider = new HttpProvider(url, rest); // TODO
@@ -30,6 +30,17 @@ class Client {
     this.defaultEpoch = defaultEpoch;
     this.defaultGasPrice = defaultGasPrice;
     this.defaultGas = defaultGas;
+
+    this.afterExecution('sendTransaction', (result) => new Subscribe.PendingTransaction(this, result));
+  }
+
+  /**
+   * @param name {string} - Method name.
+   * @param wrapper {function}
+   */
+  afterExecution(name, wrapper) {
+    const method = this[name].bind(this);
+    this[name] = (...args) => wrapper(method(...args));
   }
 
   // TODO: setProvider();
@@ -96,9 +107,9 @@ class Client {
    */
   getLogs({ fromEpoch, toEpoch, address, topics }) {
     return this.provider.call('cfx_getLogs', {
-      fromEpoch: fromEpoch === undefined ? undefined : Epoch(fromEpoch),
-      toEpoch: toEpoch === undefined ? undefined : Epoch(toEpoch),
-      address: address === undefined ? undefined : Address(address),
+      fromEpoch: fromEpoch !== undefined ? Epoch(fromEpoch) : undefined,
+      toEpoch: toEpoch !== undefined ? Epoch(toEpoch) : undefined,
+      address: address !== undefined ? Address(address) : undefined,
       topics,
     });
   }
@@ -323,6 +334,11 @@ class Client {
     return parse.block(result);
   }
 
+  async getRiskCoefficient(blockHash) {
+    // FIXME rpc not implement yet.
+    return 0;
+  }
+
   // -------------------------------- transaction -----------------------------------
   /**
    * Returns a transaction matching the given transaction hash.
@@ -439,7 +455,7 @@ class Client {
       options.nonce = await this.getTransactionCount(options.from);
     }
 
-    if (options.from instanceof Account) { // sign by local
+    if (options.from instanceof Wallet.Account) { // sign by local
       const tx = options.from.signTransaction(options);
       return this.sendRawTransaction(tx.serialize());
     } else { // sign by remote
@@ -450,7 +466,7 @@ class Client {
   /**
    * Signs a transaction. This account needs to be unlocked.
    *
-   * @param hex {string} - Raw transaction string.
+   * @param hex {string|Buffer} - Raw transaction string.
    * @return {Promise<string>} Transaction hash.
    *
    * @example
@@ -458,7 +474,7 @@ class Client {
    "0xbe007c3eca92d01f3917f33ae983f40681182cf618defe75f490a65aac016914"
    */
   sendRawTransaction(hex) {
-    return this.provider.call('cfx_sendRawTransaction', hex); // not format by Hex here.
+    return this.provider.call('cfx_sendRawTransaction', Hex(hex));
   }
 
   // -------------------------------- contract -----------------------------------
