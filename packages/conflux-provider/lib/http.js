@@ -9,7 +9,7 @@ function randomId() {
  */
 class HttpProvider {
   /**
-   * @param host {string} - Full json rpc http url
+   * @param url {string} - Full json rpc http url
    * @param [options] {object}
    * @param [options.timeout=60*1000] {number} - Request time out in ms
    * @param [options.log] {function} - Log function
@@ -18,11 +18,11 @@ class HttpProvider {
    * @example
    * > const provider = new HttpProvider('http://testnet-jsonrpc.conflux-chain.org:12537', {log: console.info});
    */
-  constructor(host, {
+  constructor(url, {
     timeout = 60 * 1000,
     log,
   } = {}) {
-    this.host = host;
+    this.url = url;
     this.timeout = timeout;
     this.log = log;
   }
@@ -39,17 +39,17 @@ class HttpProvider {
    * > await provider.call('cfx_getBlockByHash', blockHash);
    */
   async call(method, ...params) {
+    const startTime = Date.now();
+
     const data = { jsonrpc: '2.0', id: randomId(), method, params };
 
-    const startTime = Date.now();
     const { body: { result, error } = {} } = await superagent
-      .post(this.host)
+      .post(this.url)
       .send(data)
       .timeout(this.timeout);
-    const endTime = Date.now();
 
     if (this.log) {
-      this.log({ data, result, error, duration: endTime - startTime });
+      this.log({ data, result, error, duration: Date.now() - startTime });
     }
 
     if (error) {
@@ -57,8 +57,6 @@ class HttpProvider {
     }
     return result;
   }
-
-  close() {}
 }
 
 module.exports = HttpProvider;

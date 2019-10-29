@@ -1,4 +1,4 @@
-const { HttpProvider } = require('conflux-provider');
+const { HttpProvider, WebsocketProvider } = require('conflux-provider');
 const { Hex, Address, Epoch, BlockHash, TxHash } = require('conflux-utils/lib/type');
 const Transaction = require('conflux-utils/lib/tx');
 
@@ -20,11 +20,11 @@ class Client {
    */
   constructor(url, {
     defaultEpoch = Epoch.LATEST_STATE,
-    defaultGasPrice = 100, // TODO undefined
-    defaultGas = 1000000, // TODO undefined
+    defaultGasPrice,
+    defaultGas,
     ...rest
   }) {
-    this.provider = new HttpProvider(url, rest); // TODO
+    this.provider = this.setProvider(url, rest);
     this.wallet = new Wallet(this);
 
     this.defaultEpoch = defaultEpoch;
@@ -32,6 +32,22 @@ class Client {
     this.defaultGas = defaultGas;
 
     this.afterExecution('sendTransaction', (result) => new Subscribe.PendingTransaction(this, result));
+  }
+
+  setProvider(url, options) {
+    if (typeof url !== 'string') {
+      throw new Error('only support set provider by string now');
+    }
+
+    if (url.startsWith('http')) {
+      this.provider = new HttpProvider(url, options);
+    } else if (url.startsWith('ws')) {
+      this.provider = new WebsocketProvider(url, options);
+    } else {
+      throw new Error(`Invalid protocol or url "${url}"`);
+    }
+
+    return this.provider;
   }
 
   /**
@@ -42,8 +58,6 @@ class Client {
     const method = this[name].bind(this);
     this[name] = (...args) => wrapper(method(...args));
   }
-
-  // TODO: setProvider();
 
   Contract(options) {
     return new Contract(this, options);

@@ -1,5 +1,2 @@
-const HttpProvider = require('./lib/http');
-
-module.exports = {
-  HttpProvider,
-};
+module.exports.HttpProvider = require('./lib/http');
+module.exports.WebsocketProvider = require('./lib/ws');
