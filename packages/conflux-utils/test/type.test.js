@@ -4,7 +4,7 @@ const {
   Drip,
   PrivateKey,
   Address,
-  Epoch,
+  EpochNumber,
   BlockHash,
   TxHash,
 } = require('../lib/type');
@@ -116,17 +116,17 @@ test('Address', () => {
   expect(Address(ADDRESS.replace('0x', ''))).toBe(ADDRESS);
 });
 
-test('Epoch', () => {
-  expect(() => Epoch(undefined)).toThrowError('do not match hex string');
+test('EpochNumber', () => {
+  expect(() => EpochNumber(undefined)).toThrowError('do not match hex string');
 
-  expect(Epoch(null)).toBe('0x00');
-  expect(Epoch(0)).toBe('0x00');
-  expect(Epoch('100')).toBe('0x64');
-  expect(Epoch(Epoch.EARLIEST)).toBe(Epoch.EARLIEST);
-  expect(Epoch(Epoch.EARLIEST.toUpperCase())).toBe(Epoch.EARLIEST);
-  expect(Epoch(Epoch.LATEST_STATE)).toBe(Epoch.LATEST_STATE);
-  expect(Epoch(Epoch.LATEST_MINED)).toBe(Epoch.LATEST_MINED);
-  expect(() => Epoch('xxxxxxx')).toThrowError('do not match hex string');
+  expect(EpochNumber(null)).toBe('0x00');
+  expect(EpochNumber(0)).toBe('0x00');
+  expect(EpochNumber('100')).toBe('0x64');
+  expect(EpochNumber(EpochNumber.EARLIEST)).toBe(EpochNumber.EARLIEST);
+  expect(EpochNumber(EpochNumber.EARLIEST.toUpperCase())).toBe(EpochNumber.EARLIEST);
+  expect(EpochNumber(EpochNumber.LATEST_STATE)).toBe(EpochNumber.LATEST_STATE);
+  expect(EpochNumber(EpochNumber.LATEST_MINED)).toBe(EpochNumber.LATEST_MINED);
+  expect(() => EpochNumber('xxxxxxx')).toThrowError('do not match hex string');
 });
 
 test('BlockHash', () => {

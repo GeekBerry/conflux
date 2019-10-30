@@ -1,4 +1,4 @@
-const Transaction = require('../lib/tx');
+const Transaction = require('../lib/transaction');
 
 const ADDRESS = '0xbbd9e9be525ab967e633bcdaeac8bd5723ed4d6b';
 const KEY = '0xa816a06117e572ca7ae2f786a046d2bc478051d0717bf5cc4f5397923258d393';

@@ -6,8 +6,6 @@ const secp256k1 = require('secp256k1');
 
 // ----------------------------------------------------------------------------
 /**
- * keccak 256
- *
  * @param buffer {Buffer}
  * @return {Buffer}
  */
@@ -70,7 +68,7 @@ function privateKeyToAddress(privateKey) {
 /**
  * @param hash {Buffer}
  * @param privateKey {Buffer}
- * @return {object}
+ * @return {object} ECDSA signature object.
  * - r {Buffer}
  * - s {Buffer}
  * - v {number}

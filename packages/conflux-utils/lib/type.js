@@ -160,27 +160,44 @@ function Address(value) {
   return string;
 }
 
-// ---------------------------------- Epoch -----------------------------------
+// ------------------------------- EpochNumber --------------------------------
 /**
  * @memberOf type
  * @param value {string|number|Buffer|BigNumber}
  * @return {string}
  */
-function Epoch(value) {
+function EpochNumber(value) {
   if (lodash.isString(value)) {
     value = value.toLowerCase();
   }
 
-  if ([Epoch.EARLIEST, Epoch.LATEST_STATE, Epoch.LATEST_MINED].includes(value)) {
+  if ([EpochNumber.EARLIEST, EpochNumber.LATEST_STATE, EpochNumber.LATEST_MINED].includes(value)) {
     return value;
   }
 
   return Hex(Number(value));
 }
 
-Epoch.EARLIEST = 'earliest';
-Epoch.LATEST_STATE = 'latest_state';
-Epoch.LATEST_MINED = 'latest_mined';
+/**
+ * The earliest epochNumber where the genesis block in.
+ *
+ * @var {string}
+ */
+EpochNumber.EARLIEST = 'earliest';
+
+/**
+ * The latest epochNumber where the latest block with an executed state in.
+ *
+ * @var {string}
+ */
+EpochNumber.LATEST_STATE = 'latest_state';
+
+/**
+ * The latest epochNumber where the latest mined block in.
+ *
+ * @var {string}
+ */
+EpochNumber.LATEST_MINED = 'latest_mined';
 
 // ----------------------------------- BlockHash ------------------------------
 /**
@@ -215,7 +232,7 @@ module.exports = {
   Drip,
   PrivateKey,
   Address,
-  Epoch,
+  EpochNumber,
   BlockHash,
   TxHash,
 };

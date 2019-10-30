@@ -3,8 +3,6 @@ const BigNumber = require('bignumber.js');
 
 BigNumber.config({ EXPONENTIAL_AT: 1e+9 });
 
-// TODO parse with check ???
-
 function parse(schema) {
   if (Array.isArray(schema)) {
     const func = parse(schema[0]);
@@ -34,6 +32,7 @@ function parse(schema) {
   throw new Error(`unknown schema type ${typeof schema}`);
 }
 
+// ----------------------------------------------------------------------------
 parse.boolean = parse(v => Boolean(Number(v)));
 parse.number = parse(Number);
 parse.bigNumber = parse(BigNumber);

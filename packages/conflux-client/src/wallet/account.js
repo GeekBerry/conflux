@@ -1,10 +1,12 @@
 const lodash = require('lodash');
 const { Hex, PrivateKey, Address } = require('conflux-utils/lib/type');
-const { randomPrivateKey, privateKeyToAddress, encrypt, decrypt } = require('conflux-utils/lib/sign');
-const Transaction = require('conflux-utils/lib/tx');
+const { privateKeyToAddress, encrypt, decrypt } = require('conflux-utils/lib/sign');
+const Transaction = require('conflux-utils/lib/transaction');
 
 class Account {
   /**
+   * Create a account by privateKey.
+   *
    * @param privateKey {string|Buffer}
    * @return {Account}
    */
@@ -14,6 +16,8 @@ class Account {
   }
 
   /**
+   * Decrypt account encrypt info.
+   *
    * @param info {object}
    * @param password {string}
    * @return {Account}
@@ -24,6 +28,8 @@ class Account {
   }
 
   /**
+   * Encrypt account privateKey to object.
+   *
    * @param password {string}
    * @return {object}
    */
@@ -33,6 +39,8 @@ class Account {
   }
 
   /**
+   * Sign a transaction.
+   *
    * @param options {object} - See 'Transaction'
    * @return {Transaction}
    */
@@ -53,46 +61,4 @@ class Account {
   }
 }
 
-class Wallet {
-  constructor(client) {
-    this.client = client; // for remote wallet api operate
-    this.accountMap = new Map();
-  }
-
-  create(entropy) {
-    const privateKeyBuffer = randomPrivateKey(entropy !== undefined ? Hex.toBuffer(entropy) : undefined);
-    return this.add(privateKeyBuffer);
-  }
-
-  get(privateKeyOrAddress) {
-    return this.accountMap.get(privateKeyOrAddress);
-  }
-
-  add(privateKey) {
-    privateKey = PrivateKey(privateKey);
-
-    let account = this.get(privateKey);
-    if (!account) {
-      account = new Account(privateKey);
-      this.accountMap.set(account.address, account);
-      this.accountMap.set(account.privateKey, account);
-    }
-    return account;
-  }
-
-  remove(privateKeyOrAddress) {
-    const account = this.get(privateKeyOrAddress);
-    if (account instanceof Account) {
-      this.accountMap.delete(account.address);
-      this.accountMap.delete(account.privateKey);
-    }
-    return account;
-  }
-
-  clear() {
-    this.accountMap.clear();
-  }
-}
-
-module.exports = Wallet;
-module.exports.Account = Account;
+module.exports = Account;

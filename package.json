@@ -5,8 +5,8 @@
   "license": "LGPL-3.0",
   "main": "./index.js",
   "scripts": {
-    "test": "jest",
-    "reset": "lerna clean && lerna bootstrap"
+    "reset": "lerna clean && lerna bootstrap",
+    "test": "jest"
   },
   "dependencies": {
   },

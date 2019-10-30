@@ -64,7 +64,7 @@ class Transaction {
    * @param [options.r=null] {string|Buffer} - ECDSA signature r
    * @param [options.s=null] {string|Buffer} - ECDSA signature s
    * @param [options.v=null] {string|number} - ECDSA recovery id
-   * @return {{}}
+   * @return {object} Formatted sign transaction options object.
    */
   static rawOptions({ nonce, gasPrice, gas, to, value, data, r, s, v }) {
     return {

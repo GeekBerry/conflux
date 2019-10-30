@@ -1,9 +1,5 @@
 const superagent = require('superagent');
 
-function randomId() {
-  return `${Date.now()}${Math.random().toFixed(7).substring(2)}`; // 13+7=20 int string
-}
-
 /**
  * Http protocol json rpc provider.
  */
@@ -28,6 +24,16 @@ class HttpProvider {
   }
 
   /**
+   * Gen a random json rpc id.
+   * It is used in `call` method, overwrite it to gen your own id.
+   *
+   * @return {string}
+   */
+  requestId() {
+    return `${Date.now()}${Math.random().toFixed(7).substring(2)}`; // 13+7=20 int string
+  }
+
+  /**
    * Call a json rpc method with params
    *
    * @param method {string} - Json rpc method name.
@@ -41,7 +47,7 @@ class HttpProvider {
   async call(method, ...params) {
     const startTime = Date.now();
 
-    const data = { jsonrpc: '2.0', id: randomId(), method, params };
+    const data = { jsonrpc: '2.0', id: this.requestId(), method, params };
 
     const { body: { result, error } = {} } = await superagent
       .post(this.url)
@@ -57,6 +63,8 @@ class HttpProvider {
     }
     return result;
   }
+
+  close() {}
 }
 
 module.exports = HttpProvider;
