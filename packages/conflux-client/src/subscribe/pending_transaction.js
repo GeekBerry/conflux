@@ -9,8 +9,13 @@ class PendingTransaction {
     this.value = value;
   }
 
-  then(resolve) {
-    resolve(this.value);
+  async then(resolve, reject) {
+    try {
+      const result = await this.value;
+      resolve(result);
+    } catch (e) {
+      reject(e);
+    }
   }
 
   /**
@@ -36,7 +41,7 @@ class PendingTransaction {
    * @param [options.timeout=30*1000] {number} - Loop timeout in ms.
    * @return {Promise<object>} See `Client.getTransactionByHash`
    */
-  async mined(options) {
+  async mined({ delta = 1000, timeout = 30 * 1000 } = {}) {
     return loop(
       async () => {
         const tx = await this.get();
@@ -44,7 +49,7 @@ class PendingTransaction {
           return tx;
         }
       },
-      options,
+      { delta, timeout },
     );
   }
 
@@ -57,10 +62,10 @@ class PendingTransaction {
    *
    * @param [options] {object}
    * @param [options.delta=1000] {number} - Loop transaction interval in ms.
-   * @param [options.timeout=30*1000] {number} - Loop timeout in ms.
+   * @param [options.timeout=60*1000] {number} - Loop timeout in ms.
    * @return {Promise<object>} See `Client.getTransactionReceipt`
    */
-  async executed(options) {
+  async executed({ delta = 1000, timeout = 60 * 1000 } = {}) {
     const txHash = await this;
     return loop(
       async () => {
@@ -69,11 +74,11 @@ class PendingTransaction {
           if (receipt.outcomeStatus === 0) {
             return receipt;
           } else {
-            throw new Error(`transaction "${txHash}" deploy failed, outcomeStatus ${receipt.outcomeStatus}`);
+            throw new Error(`transaction "${txHash}" executed failed, outcomeStatus ${receipt.outcomeStatus}`);
           }
         }
       },
-      options,
+      { delta, timeout },
     );
   }
 
@@ -85,19 +90,19 @@ class PendingTransaction {
    *
    * @param [options] {object}
    * @param [options.delta=1000] {number} - Loop transaction interval in ms.
-   * @param [options.timeout=30*1000] {number} - Loop timeout in ms.
+   * @param [options.timeout=5*60*1000] {number} - Loop timeout in ms.
    * @param [options.threshold=0.01] {number} - Number in range (0,1)
    * @return {Promise<object>} See `Client.getTransactionReceipt`
    */
-  async confirmed({ threshold = 0.01, ...options } = {}) {
+  async confirmed({ threshold = 0.01, delta = 1000, timeout = 5 * 60 * 1000 } = {}) {
     return loop(
       async () => {
-        const receipt = await this.executed(options);
+        const receipt = await this.executed({ delta, timeout });
         if (await this.client.getRiskCoefficient(receipt.blockHash) < threshold) {
           return receipt;
         }
       },
-      options,
+      { delta, timeout },
     );
   }
 
@@ -105,10 +110,7 @@ class PendingTransaction {
    * Async wait till contract create transaction deployed.
    * - transaction confirmed
    *
-   * @param [options] {object}
-   * @param [options.delta=1000] {number} - Loop transaction interval in ms.
-   * @param [options.timeout=30*1000] {number} - Loop timeout in ms.
-   * @param [options.threshold=0.01] {number} - Number in range (0,1)
+   * @param [options] {object} - See `PendingTransaction.confirmed`
    * @return {Promise<string>} The contract address.
    */
   async deployed(options) {

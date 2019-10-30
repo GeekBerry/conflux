@@ -8,10 +8,8 @@
     "reset": "lerna clean && lerna bootstrap",
     "test": "jest"
   },
-  "dependencies": {
-  },
   "devDependencies": {
-    "lerna": "^3.16.4",
+    "csv-xlsx": "0.0.5",
     "jest": "^24.9.0"
   }
 }

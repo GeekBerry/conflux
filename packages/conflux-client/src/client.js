@@ -1,6 +1,7 @@
+const lodash = require('lodash');
 const { HttpProvider, WebsocketProvider } = require('../lib/provider');
-const { Hex, Address, EpochNumber, BlockHash, TxHash } = require('conflux-utils/lib/type');
-const Transaction = require('conflux-utils/lib/transaction');
+const { Hex, Address, EpochNumber, BlockHash, TxHash } = require('conflux-utils/src/type');
+const Transaction = require('conflux-utils/src/transaction');
 
 const parse = require('./utils/parse');
 const Contract = require('./contract');
@@ -12,23 +13,25 @@ const Subscribe = require('./subscribe');
  */
 class Client {
   /**
-   * @param url {string} - Url of provider to create.
    * @param [options] {object} - Client and Provider constructor options.
+   * @param [options.url=''] {string} - Url of provider to create.
    * @param [options.defaultEpoch=EpochNumber.LATEST_STATE] {string|number} - Default epochNumber.
    * @param [options.defaultGasPrice] {string|number|BigNumber} - The default gas price in drip to use for transactions.
    * @param [options.defaultGas] {string|number|BigNumber} - The default maximum gas provided for a transaction (gasLimit).
    *
    * @example
-   * > const client = new Client('http://testnet-jsonrpc.conflux-chain.org:12537');
+   * > const client = new Client({url:'http://testnet-jsonrpc.conflux-chain.org:12537'});
    *
    * @example
-   * > const client = new Client('http://localhost:8000', {
-   *   log: console.log,
+   * > const client = new Client({
+   *   url: 'http://localhost:8000',
    *   defaultGasPrice: 100,
    *   defaultGas: 100000,
+   *   log: console.log,
    * });
    */
-  constructor(url, {
+  constructor({
+    url = '',
     defaultEpoch = EpochNumber.LATEST_STATE,
     defaultGasPrice,
     defaultGas,
@@ -48,7 +51,7 @@ class Client {
   /**
    * Create and set `provider` for client.
    *
-   * @param url {string} - Url of provider to create.
+   * @param [url=''] {string} - Url of provider to create.
    * @param [options] {object} - Provider constructor options.
    * @return {Object}
    *
@@ -70,10 +73,12 @@ class Client {
    */
   setProvider(url, options) {
     if (typeof url !== 'string') {
-      throw new Error('only support set provider by string now');
+      throw new Error('provider url must by string');
     }
 
-    if (url.startsWith('http')) {
+    if (url === '') {
+      this.provider = null;
+    } else if (url.startsWith('http')) {
       this.provider = new HttpProvider(url, options);
     } else if (url.startsWith('ws')) {
       this.provider = new WebsocketProvider(url, options);
@@ -106,7 +111,9 @@ class Client {
    * > client.close();
    */
   close() {
-    this.provider.close();
+    if (this.provider) {
+      this.provider.close();
+    }
   }
 
   // --------------------------------------------------------------------------
@@ -155,7 +162,7 @@ class Client {
       address: '0x169a10a431130B2F4853294A4a966803668af385'
     });
    */
-  getLogs({ fromEpoch, toEpoch, address, topics }) {
+  async getLogs({ fromEpoch, toEpoch, address, topics }) {
     return this.provider.call('cfx_getLogs', {
       fromEpoch: fromEpoch !== undefined ? EpochNumber(fromEpoch) : undefined,
       toEpoch: toEpoch !== undefined ? EpochNumber(toEpoch) : undefined,
@@ -211,7 +218,7 @@ class Client {
   // -------------------------------- block -----------------------------------
 
   // TODO
-  // getBestBlockHash() {
+  // async getBestBlockHash() {
   //   return this.provider.call('cfx_getBestBlockHash');
   // }
 
@@ -231,7 +238,7 @@ class Client {
    '0x59339ff28bc235cceac9fa588ebafcbf61316e6a8c86c7a1d7239b9445d98e40'
    ]
    */
-  getBlocksByEpoch(epochNumber) {
+  async getBlocksByEpoch(epochNumber) {
     return this.provider.call('cfx_getBlocksByEpoch', EpochNumber(epochNumber));
   }
 
@@ -246,7 +253,7 @@ class Client {
    * - `string` parentHash: Hash of the parent block.
    * - `string[]` refereeHashes: Array of referee hashes.
    * - `number|null` epochNumber: The current block epochNumber in the client's view. `null` when it's not in best block's past set.
-   * - `boolean` stable: Ff the block stable or not
+   * - `boolean` stable: If the block stable or not
    * - `string` nonce: Hash of the generated proof-of-work. `null` when its pending block.
    * - `number` gas: The maximum gas allowed in this block.
    * - `string` difficulty: Integer string of the difficulty for this block.
@@ -328,6 +335,9 @@ class Client {
    }
    */
   async getBlockByHash(blockHash, detail = false) {
+    if (!lodash.isBoolean(detail)) {
+      throw new Error('detail must be boolean');
+    }
     const result = await this.provider.call('cfx_getBlockByHash', BlockHash(blockHash), detail);
     return parse.block(result);
   }
@@ -347,6 +357,9 @@ class Client {
    }
    */
   async getBlockByEpochNumber(epochNumber, detail = false) {
+    if (!lodash.isBoolean(detail)) {
+      throw new Error('detail must be boolean');
+    }
     const result = await this.provider.call('cfx_getBlockByEpochNumber', EpochNumber(epochNumber), detail);
     return parse.block(result);
   }
@@ -589,7 +602,7 @@ class Client {
    * > await client.sendRawTransaction('0xf85f800382520894bbd9e9b...');
    "0xbe007c3eca92d01f3917f33ae983f40681182cf618defe75f490a65aac016914"
    */
-  sendRawTransaction(hex) {
+  async sendRawTransaction(hex) {
     return this.provider.call('cfx_sendRawTransaction', Hex(hex));
   }
 
@@ -605,7 +618,7 @@ class Client {
    * > await client.getCode('0xb385b84f08161f92a195953b980c8939679e906a');
    "0x6080604052348015600f57600080fd5b506004361060325760003560e01c806306661abd1460375780638..."
    */
-  getCode(address, epochNumber = this.defaultEpoch) {
+  async getCode(address, epochNumber = this.defaultEpoch) {
     return this.provider.call('cfx_getCode', Address(address), EpochNumber(epochNumber));
   }
 

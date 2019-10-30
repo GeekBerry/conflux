@@ -44,20 +44,28 @@ parse.block = parse({
   height: parse.number,
   size: parse.number,
   timestamp: parse.number,
-  gas: parse.number,
+  gasLimit: parse.number,
   difficulty: parse.bigNumber,
   transactions: parse([v => (lodash.isObject(v) ? parse.transaction(v) : v)]),
 });
 
 parse.transaction = parse({
-  status: parse.number,
+  index: parse.number, // getTransactionReceipt
+  transactionIndex: parse.number, // getTransactionByHash
+
+  status: parse.number, // getTransactionByHash
+  outcomeStatus: parse.number, // getTransactionReceipt
+
+  epochNumber: parse.number, // getTransactionReceipt
+
   nonce: parse.number,
   value: parse.bigNumber,
   gasPrice: parse.bigNumber,
-  gasUsed: parse.number,
+
   gas: parse.number,
+  gasUsed: parse.number,
+
   timestamp: parse.number,
-  transactionIndex: parse.number,
   v: parse.number,
 });
 

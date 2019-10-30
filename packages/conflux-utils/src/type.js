@@ -53,6 +53,14 @@ Hex.isHex = function (hex) {
   return /^0x([0-9a-f][0-9a-f])*$/.test(hex);
 };
 
+Hex.isHex40 = function (hex) {
+  return /^0x[0-9a-f]{40}$/.test(hex);
+};
+
+Hex.isHex64 = function (hex) {
+  return /^0x[0-9a-f]{64}$/.test(hex);
+};
+
 /**
  * @param hex {string} - The hex string.
  * @return {Buffer}
@@ -68,6 +76,15 @@ Hex.toBuffer = function (hex) {
   }
   return buffer;
 };
+// ---------------------------------- UInt ------------------------------------
+/**
+ * @memberOf type
+ * @param value
+ * @return {string}
+ */
+function UInt(value) {
+  return Hex(Number(value))
+}
 
 // ---------------------------------- Drip ------------------------------------
 /**
@@ -118,7 +135,7 @@ Drip.fromCFX = function (value) {
  * @param value {string|number|BigNumber}
  * @return {BigNumber}
  */
-Drip.toGrip = function (value) {
+Drip.toGDrip = function (value) {
   return BigNumber(value).div(1e9);
 };
 
@@ -139,11 +156,11 @@ Drip.toCFX = function (value) {
  * @return {string}
  */
 function PrivateKey(value) {
-  const string = Hex(value);
-  if (string.length !== 2 + 64) {
-    throw new Error(`${value} do not match PrivateKey length`);
+  const hex = Hex(value);
+  if (hex.length !== 2 + 64) { // XXX: check length for performance
+    throw new Error(`${value} do not match PrivateKey`);
   }
-  return string;
+  return hex;
 }
 
 // ----------------------------------- Address --------------------------------
@@ -153,11 +170,11 @@ function PrivateKey(value) {
  * @return {string}
  */
 function Address(value) {
-  const string = Hex(value);
-  if (string.length !== 2 + 40) {
-    throw new Error(`${value} do not match Address length`);
+  const hex = Hex(value);
+  if (hex.length !== 2 + 40) { // XXX: check length for performance
+    throw new Error(`${value} do not match Address`);
   }
-  return string;
+  return hex;
 }
 
 // ------------------------------- EpochNumber --------------------------------
@@ -208,7 +225,7 @@ EpochNumber.LATEST_MINED = 'latest_mined';
 function BlockHash(value) {
   const string = Hex(value);
   if (string.length !== 2 + 64) {
-    throw new Error(`${value} do not match BlockHash length`);
+    throw new Error(`${value} do not match BlockHash`);
   }
   return string;
 }
@@ -222,13 +239,14 @@ function BlockHash(value) {
 function TxHash(value) {
   const string = Hex(value);
   if (string.length !== 2 + 64) {
-    throw new Error(`${value} do not match TxHash length`);
+    throw new Error(`${value} do not match TxHash`);
   }
   return string;
 }
 
 module.exports = {
   Hex,
+  UInt,
   Drip,
   PrivateKey,
   Address,

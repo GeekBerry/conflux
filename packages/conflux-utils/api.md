@@ -179,17 +179,6 @@ password       | Buffer | true     |         |
 
 
 
-## Transaction.hash
-
-
-``
-
-
-## Transaction.from
-
-
-``
-
 
 ## Transaction.constructor
 
@@ -204,6 +193,36 @@ options | object | true     |         | See `Transaction.rawOptions`
 ### Return
 
 `Transaction` 
+
+
+## Transaction.hash
+
+Getter of transaction hash include signature.
+
+> Note: calculate every time.
+
+### Parameters
+
+`void`
+
+### Return
+
+`string,undefined` If transaction has r,s,v return hex string, else return undefined.
+
+
+## Transaction.from
+
+Getter of sender address.
+
+> Note: calculate every time.
+
+### Parameters
+
+`void`
+
+### Return
+
+`string,undefined` If ECDSA recover success return address, else return undefined.
 
 
 ## Transaction.sign
@@ -223,7 +242,7 @@ privateKey | string | true     |         | Private key hex string.
 
 ## Transaction.encode
 
-
+Encode rlp.
 
 ### Parameters
 
@@ -255,16 +274,16 @@ Get the raw tx hex string.
 
 ### Parameters
 
-Name             | Type                      | Required | Default | Description
------------------|---------------------------|----------|---------|----------------------------------------------------------------------------------------------------
-options          | object                    | true     |         |
-options.from     | string                    | true     |         | The address the transaction is send from.
-options.nonce    | string\|number            | true     |         | This allows to overwrite your own pending transactions that use the same nonce.
-options.gasPrice | string\|number            | true     |         | The gasPrice used for each paid gas.
-options.gas      | string\|number\|BigNumber | true     |         | The gas provided for the transaction execution. It will return unused gas.
-options.to       | string                    | false    |         | The address the transaction is directed to.
-options.value    | string\|number\|BigNumber | false    |         | the value sent with this transaction
-options.data     | string\|Buffer            | false    | ''      | The compiled code of a contract OR the hash of the invoked method signature and encoded parameters.
+Name             | Type                    | Required | Default | Description
+-----------------|-------------------------|----------|---------|----------------------------------------------------------------------------------------------------
+options          | object                  | true     |         |
+options.from     | string                  | true     |         | The address the transaction is send from.
+options.nonce    | string,number           | true     |         | This allows to overwrite your own pending transactions that use the same nonce.
+options.gasPrice | string,number           | true     |         | The gasPrice used for each paid gas.
+options.gas      | string,number           | true     |         | The gas provided for the transaction execution. It will return unused gas.
+options.to       | string                  | false    |         | The address the transaction is directed to.
+options.value    | string,number,BigNumber | false    |         | the value sent with this transaction
+options.data     | string,Buffer           | false    | ''      | The compiled code of a contract OR the hash of the invoked method signature and encoded parameters.
 
 ### Return
 
@@ -277,16 +296,16 @@ options.data     | string\|Buffer            | false    | ''      | The compiled
 
 ### Parameters
 
-Name             | Type                      | Required | Default | Description
------------------|---------------------------|----------|---------|-------------------------------------------------------------------------------------------------------------------------------
-options          | object                    | true     |         |
-options.from     | string                    | false    |         | The address the transaction is sent from.
-options.nonce    | string\|number            | false    |         | The caller nonce (transaction count).
-options.gasPrice | string\|number            | false    |         | The gasPrice used for each paid gas.
-options.gas      | string\|number\|BigNumber | false    |         | The gas provided for the transaction execution. `call` consumes zero gas, but this parameter may be needed by some executions.
-options.to       | string                    | true     |         | The address the transaction is directed to.
-options.value    | string\|number\|BigNumber | false    |         | Integer of the value sent with this transaction.
-options.data     | string\|Buffer            | false    |         | Hash of the method signature and encoded parameters.
+Name             | Type                    | Required | Default | Description
+-----------------|-------------------------|----------|---------|-------------------------------------------------------------------------------------------------------------------------------
+options          | object                  | true     |         |
+options.from     | string                  | false    |         | The address the transaction is sent from.
+options.nonce    | string,number           | false    |         | The caller nonce (transaction count).
+options.gasPrice | string,number           | false    |         | The gasPrice used for each paid gas.
+options.gas      | string,number           | false    |         | The gas provided for the transaction execution. `call` consumes zero gas, but this parameter may be needed by some executions.
+options.to       | string                  | true     |         | The address the transaction is directed to.
+options.value    | string,number,BigNumber | false    |         | Integer of the value sent with this transaction.
+options.data     | string,Buffer           | false    |         | Hash of the method signature and encoded parameters.
 
 ### Return
 
@@ -299,18 +318,18 @@ options.data     | string\|Buffer            | false    |         | Hash of the 
 
 ### Parameters
 
-Name             | Type                      | Required | Default | Description
------------------|---------------------------|----------|---------|------------------------------------------------------------------------------------------------------------------------------------------------------------
-options          | object                    | true     |         |
-options.nonce    | string\|number            | true     |         | This allows to overwrite your own pending transactions that use the same nonce.
-options.gasPrice | string\|number            | true     |         | The price of gas for this transaction in drip.
-options.gas      | string\|number            | true     |         | The amount of gas to use for the transaction (unused gas is refunded).
-options.to       | string                    | false    |         | The destination address of the message, left undefined for a contract-creation transaction.
-options.value    | string\|number\|BigNumber | false    | 0       | The value transferred for the transaction in drip, also the endowment if it’s a contract-creation transaction.
-options.data     | string\|Buffer            | false    | ''      | Either a ABI byte string containing the data of the function call on a contract, or in the case of a contract-creation transaction the initialisation code.
-options.r        | string\|Buffer            | false    |         | ECDSA signature r
-options.s        | string\|Buffer            | false    |         | ECDSA signature s
-options.v        | string\|number            | false    |         | ECDSA recovery id
+Name             | Type                    | Required | Default | Description
+-----------------|-------------------------|----------|---------|------------------------------------------------------------------------------------------------------------------------------------------------------------
+options          | object                  | true     |         |
+options.nonce    | string,number           | true     |         | This allows to overwrite your own pending transactions that use the same nonce.
+options.gasPrice | string,number,BigNumber | true     |         | The price of gas for this transaction in drip.
+options.gas      | string,number           | true     |         | The amount of gas to use for the transaction (unused gas is refunded).
+options.to       | string                  | false    |         | The destination address of the message, left undefined for a contract-creation transaction.
+options.value    | string,number,BigNumber | false    | 0       | The value transferred for the transaction in drip, also the endowment if it’s a contract-creation transaction.
+options.data     | string,Buffer           | false    | ''      | Either a ABI byte string containing the data of the function call on a contract, or in the case of a contract-creation transaction the initialisation code.
+options.r        | string,Buffer           | false    |         | ECDSA signature r
+options.s        | string,Buffer           | false    |         | ECDSA signature s
+options.v        | string,number           | false    |         | ECDSA recovery id
 
 ### Return
 
@@ -346,9 +365,9 @@ The latest epochNumber where the latest mined block in.
 
 ### Parameters
 
-Name  | Type                                          | Required | Default | Description
-------|-----------------------------------------------|----------|---------|-----------------------------
-value | string\|number\|Buffer\|Date\|BigNumber\|null | true     |         | The value to gen hex string.
+Name  | Type                                     | Required | Default | Description
+------|------------------------------------------|----------|---------|-----------------------------
+value | string,number,Buffer,Date,BigNumber,null | true     |         | The value to gen hex string.
 
 ### Return
 
@@ -387,15 +406,30 @@ hex  | string | true     |         | The hex string.
 `Buffer` 
 
 
+## type.UInt
+
+
+
+### Parameters
+
+Name  | Type | Required | Default | Description
+------|------|----------|---------|------------
+value |      | true     |         |
+
+### Return
+
+`string` 
+
+
 ## type.Drip
 
 
 
 ### Parameters
 
-Name  | Type                              | Required | Default | Description
-------|-----------------------------------|----------|---------|------------
-value | string\|number\|Buffer\|BigNumber | true     |         |
+Name  | Type                           | Required | Default | Description
+------|--------------------------------|----------|---------|------------
+value | string,number,Buffer,BigNumber | true     |         |
 
 ### Return
 
@@ -408,9 +442,9 @@ Get Drip hex string by GDrip value.
 
 ### Parameters
 
-Name  | Type                      | Required | Default | Description
-------|---------------------------|----------|---------|----------------
-value | string\|number\|BigNumber | true     |         | Value in GDrip.
+Name  | Type                    | Required | Default | Description
+------|-------------------------|----------|---------|----------------
+value | string,number,BigNumber | true     |         | Value in GDrip.
 
 ### Return
 
@@ -423,24 +457,24 @@ Get Drip hex string by CFX value.
 
 ### Parameters
 
-Name  | Type                      | Required | Default | Description
-------|---------------------------|----------|---------|--------------
-value | string\|number\|BigNumber | true     |         | Value in CFX.
+Name  | Type                    | Required | Default | Description
+------|-------------------------|----------|---------|--------------
+value | string,number,BigNumber | true     |         | Value in CFX.
 
 ### Return
 
 `string` Hex string in drip.
 
 
-## type.Drip.toGrip
+## type.Drip.toGDrip
 
 Get `GDrip` from Drip.
 
 ### Parameters
 
-Name  | Type                      | Required | Default | Description
-------|---------------------------|----------|---------|------------
-value | string\|number\|BigNumber | true     |         |
+Name  | Type                    | Required | Default | Description
+------|-------------------------|----------|---------|------------
+value | string,number,BigNumber | true     |         |
 
 ### Return
 
@@ -453,9 +487,9 @@ Get `CFX` from Drip.
 
 ### Parameters
 
-Name  | Type                      | Required | Default | Description
-------|---------------------------|----------|---------|------------
-value | string\|number\|BigNumber | true     |         |
+Name  | Type                    | Required | Default | Description
+------|-------------------------|----------|---------|------------
+value | string,number,BigNumber | true     |         |
 
 ### Return
 
@@ -468,9 +502,9 @@ value | string\|number\|BigNumber | true     |         |
 
 ### Parameters
 
-Name  | Type                              | Required | Default | Description
-------|-----------------------------------|----------|---------|------------
-value | string\|number\|Buffer\|BigNumber | true     |         |
+Name  | Type                           | Required | Default | Description
+------|--------------------------------|----------|---------|------------
+value | string,number,Buffer,BigNumber | true     |         |
 
 ### Return
 
@@ -483,9 +517,9 @@ value | string\|number\|Buffer\|BigNumber | true     |         |
 
 ### Parameters
 
-Name  | Type                              | Required | Default | Description
-------|-----------------------------------|----------|---------|------------
-value | string\|number\|Buffer\|BigNumber | true     |         |
+Name  | Type                           | Required | Default | Description
+------|--------------------------------|----------|---------|------------
+value | string,number,Buffer,BigNumber | true     |         |
 
 ### Return
 
@@ -498,9 +532,9 @@ value | string\|number\|Buffer\|BigNumber | true     |         |
 
 ### Parameters
 
-Name  | Type                              | Required | Default | Description
-------|-----------------------------------|----------|---------|------------
-value | string\|number\|Buffer\|BigNumber | true     |         |
+Name  | Type                           | Required | Default | Description
+------|--------------------------------|----------|---------|------------
+value | string,number,Buffer,BigNumber | true     |         |
 
 ### Return
 
@@ -513,9 +547,9 @@ value | string\|number\|Buffer\|BigNumber | true     |         |
 
 ### Parameters
 
-Name  | Type                              | Required | Default | Description
-------|-----------------------------------|----------|---------|------------
-value | string\|number\|Buffer\|BigNumber | true     |         |
+Name  | Type                           | Required | Default | Description
+------|--------------------------------|----------|---------|------------
+value | string,number,Buffer,BigNumber | true     |         |
 
 ### Return
 
@@ -528,9 +562,9 @@ value | string\|number\|Buffer\|BigNumber | true     |         |
 
 ### Parameters
 
-Name  | Type                              | Required | Default | Description
-------|-----------------------------------|----------|---------|------------
-value | string\|number\|Buffer\|BigNumber | true     |         |
+Name  | Type                           | Required | Default | Description
+------|--------------------------------|----------|---------|------------
+value | string,number,Buffer,BigNumber | true     |         |
 
 ### Return
 

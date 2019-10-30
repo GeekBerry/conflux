@@ -1,0 +1,76 @@
+{
+  "abi": [
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "count",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [],
+      "name": "self",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "num",
+          "type": "uint256"
+        }
+      ],
+      "name": "inc",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "num",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "constructor"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "sender",
+          "type": "address"
+        }
+      ],
+      "name": "SelfEvent",
+      "type": "event"
+    }
+  ],
+  "code": "0x60806040526000805534801561001457600080fd5b506040516101a63803806101a68339818101604052602081101561003757600080fd5b810190808051906020019092919050505080600081905550506101478061005f6000396000f3fe608060405234801561001057600080fd5b50600436106100415760003560e01c806306661abd146100465780637104ddb214610064578063812600df1461006e575b600080fd5b61004e6100b0565b6040518082815260200191505060405180910390f35b61006c6100b6565b005b61009a6004803603602081101561008457600080fd5b81019080803590602001909291905050506100fb565b6040518082815260200191505060405180910390f35b60005481565b3373ffffffffffffffffffffffffffffffffffffffff167fb818399ffd68e821c34de8d5fbc5aeda8456fdb9296fc1b02bf6245ade7ebbd460405160405180910390a2565b60008160008082825401925050819055905091905056fea265627a7a72315820644c60eea02d21c25066ff0f1c557a36b15d3712932561264eaa07268f1c907e64736f6c634300050b0032",
+  "address": "0xc3ed1a06471be1d3bcd014051fbe078387ec0ad8"
+}

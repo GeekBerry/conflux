@@ -1,7 +1,7 @@
 const lodash = require('lodash');
-const { Hex, PrivateKey, Address } = require('conflux-utils/lib/type');
-const { privateKeyToAddress, encrypt, decrypt } = require('conflux-utils/lib/sign');
-const Transaction = require('conflux-utils/lib/transaction');
+const { Hex, PrivateKey, Address } = require('conflux-utils/src/type');
+const { privateKeyToAddress, encrypt, decrypt } = require('conflux-utils/src/sign');
+const Transaction = require('conflux-utils/src/transaction');
 
 class Account {
   /**

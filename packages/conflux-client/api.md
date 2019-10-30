@@ -11,13 +11,13 @@ A client of conflux node.
 
 ### Parameters
 
-Name                    | Type                      | Required | Default                  | Description
-------------------------|---------------------------|----------|--------------------------|---------------------------------------------------------------
-url                     | string                    | true     |                          | Url of provider to create.
-options                 | object                    | false    |                          | Client and Provider constructor options.
-options.defaultEpoch    | string\|number            | false    | EpochNumber.LATEST_STATE | Default epochNumber.
-options.defaultGasPrice | string\|number\|BigNumber | false    |                          | The default gas price in drip to use for transactions.
-options.defaultGas      | string\|number\|BigNumber | false    |                          | The default maximum gas provided for a transaction (gasLimit).
+Name                    | Type                    | Required | Default                  | Description
+------------------------|-------------------------|----------|--------------------------|---------------------------------------------------------------
+options                 | object                  | false    |                          | Client and Provider constructor options.
+options.url             | string                  | false    | ''                       | Url of provider to create.
+options.defaultEpoch    | string,number           | false    | EpochNumber.LATEST_STATE | Default epochNumber.
+options.defaultGasPrice | string,number,BigNumber | false    |                          | The default gas price in drip to use for transactions.
+options.defaultGas      | string,number,BigNumber | false    |                          | The default maximum gas provided for a transaction (gasLimit).
 
 ### Return
 
@@ -26,11 +26,11 @@ options.defaultGas      | string\|number\|BigNumber | false    |                
 ### Example
 
 ```
-> const client = new Client('http://testnet-jsonrpc.conflux-chain.org:12537');
+> const client = new Client({url:'http://testnet-jsonrpc.conflux-chain.org:12537'});
 ```
 
 ```
-> const client = new Client('http://localhost:8000', {  log: console.log,  defaultGasPrice: 100,  defaultGas: 100000,});
+> const client = new Client({  url: 'http://localhost:8000',  defaultGasPrice: 100,  defaultGas: 100000,  log: console.log,});
 ```
 
 ## Client.setProvider
@@ -41,7 +41,7 @@ Create and set `provider` for client.
 
 Name    | Type   | Required | Default | Description
 --------|--------|----------|---------|------------------------------
-url     | string | true     |         | Url of provider to create.
+url     | string | false    | ''      | Url of provider to create.
 options | object | false    |         | Provider constructor options.
 
 ### Return
@@ -141,13 +141,13 @@ Gets past logs, matching the given options.
 
 ### Parameters
 
-Name              | Type                   | Required | Default | Description
-------------------|------------------------|----------|---------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-options           | object                 | false    |         |
-options.fromEpoch | string\|number         | false    |         | The number of the earliest block
-options.toEpoch   | string\|number         | false    |         | The number of the latest block
-options.address   | string\|Array.<string> | false    |         | An address or a list of addresses to only get logs from particular account(s).
-options.topics    | array                  | false    |         | An array of values which must each appear in the log entries. The order is important, if you want to leave topics out use null, e.g. [null, '0x12...']. You can also pass an array for each topic with options for that topic e.g. [null, ['option1', 'option2']]
+Name              | Type                  | Required | Default | Description
+------------------|-----------------------|----------|---------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+options           | object                | false    |         |
+options.fromEpoch | string,number         | false    |         | The number of the earliest block
+options.toEpoch   | string,number         | false    |         | The number of the latest block
+options.address   | string,Array.<string> | false    |         | An address or a list of addresses to only get logs from particular account(s).
+options.topics    | array                 | false    |         | An array of values which must each appear in the log entries. The order is important, if you want to leave topics out use null, e.g. [null, '0x12...']. You can also pass an array for each topic with options for that topic e.g. [null, ['option1', 'option2']]
 
 ### Return
 
@@ -169,10 +169,10 @@ Get the balance of an address at a given epochNumber.
 
 ### Parameters
 
-Name        | Type           | Required | Default           | Description
-------------|----------------|----------|-------------------|-----------------------------------------
-address     | string         | true     |                   | The address to get the balance of.
-epochNumber | string\|number | false    | this.defaultEpoch | The end epochNumber to count balance of.
+Name        | Type          | Required | Default           | Description
+------------|---------------|----------|-------------------|-----------------------------------------
+address     | string        | true     |                   | The address to get the balance of.
+epochNumber | string,number | false    | this.defaultEpoch | The end epochNumber to count balance of.
 
 ### Return
 
@@ -193,10 +193,10 @@ Get the numbers of transactions sent from this address.
 
 ### Parameters
 
-Name        | Type           | Required | Default           | Description
-------------|----------------|----------|-------------------|-----------------------------------------------------
-address     | string         | true     |                   | The address to get the numbers of transactions from.
-epochNumber | string\|number | false    | this.defaultEpoch | The end epochNumber to count transaction of.
+Name        | Type          | Required | Default           | Description
+------------|---------------|----------|-------------------|-----------------------------------------------------
+address     | string        | true     |                   | The address to get the numbers of transactions from.
+epochNumber | string,number | false    | this.defaultEpoch | The end epochNumber to count transaction of.
 
 ### Return
 
@@ -216,9 +216,9 @@ Get block hash array of a epochNumber.
 
 ### Parameters
 
-Name        | Type           | Required | Default | Description
-------------|----------------|----------|---------|-----------------------------------------------------------
-epochNumber | string\|number | true     |         | EpochNumber or string in ["latest", "earliest", "pending"]
+Name        | Type          | Required | Default | Description
+------------|---------------|----------|---------|-----------------------------------------------------------
+epochNumber | string,number | true     |         | EpochNumber or string in ["latest", "earliest", "pending"]
 
 ### Return
 
@@ -254,7 +254,7 @@ detail    | boolean | false    | false   | `true` return transaction object, `fa
 - `string` parentHash: Hash of the parent block.
 - `string[]` refereeHashes: Array of referee hashes.
 - `number|null` epochNumber: The current block epochNumber in the client's view. `null` when it's not in best block's past set.
-- `boolean` stable: Ff the block stable or not
+- `boolean` stable: If the block stable or not
 - `string` nonce: Hash of the generated proof-of-work. `null` when its pending block.
 - `number` gas: The maximum gas allowed in this block.
 - `string` difficulty: Integer string of the difficulty for this block.
@@ -345,10 +345,10 @@ Get the epochNumber pivot block info.
 
 ### Parameters
 
-Name        | Type           | Required | Default | Description
-------------|----------------|----------|---------|--------------------------------------------------------------
-epochNumber | string\|number | true     |         | EpochNumber or string in ["latest", "earliest", "pending"]
-detail      | boolean        | false    | false   | `true` return transaction object, `false` return TxHash array
+Name        | Type          | Required | Default | Description
+------------|---------------|----------|---------|--------------------------------------------------------------
+epochNumber | string,number | true     |         | EpochNumber or string in ["latest", "earliest", "pending"]
+detail      | boolean       | false    | false   | `true` return transaction object, `false` return TxHash array
 
 ### Return
 
@@ -585,9 +585,9 @@ Signs a transaction. This account needs to be unlocked.
 
 ### Parameters
 
-Name | Type           | Required | Default | Description
------|----------------|----------|---------|------------------------
-hex  | string\|Buffer | true     |         | Raw transaction string.
+Name | Type          | Required | Default | Description
+-----|---------------|----------|---------|------------------------
+hex  | string,Buffer | true     |         | Raw transaction string.
 
 ### Return
 
@@ -606,10 +606,10 @@ Get the code at a specific address.
 
 ### Parameters
 
-Name        | Type           | Required | Default           | Description
-------------|----------------|----------|-------------------|-----------------------------------------------------------
-address     | string         | true     |                   | The contract address to get the code from.
-epochNumber | string\|number | false    | this.defaultEpoch | EpochNumber or string in ["latest", "earliest", "pending"]
+Name        | Type          | Required | Default           | Description
+------------|---------------|----------|-------------------|-----------------------------------------------------------
+address     | string        | true     |                   | The contract address to get the code from.
+epochNumber | string,number | false    | this.defaultEpoch | EpochNumber or string in ["latest", "earliest", "pending"]
 
 ### Return
 
@@ -629,10 +629,10 @@ but never mined into the block chain.
 
 ### Parameters
 
-Name        | Type           | Required | Default           | Description
-------------|----------------|----------|-------------------|----------------------------------------
-options     | object         | true     |                   | See `Transaction.callOptions`
-epochNumber | string\|number | false    | this.defaultEpoch | The end epochNumber to execute call of.
+Name        | Type          | Required | Default           | Description
+------------|---------------|----------|-------------------|----------------------------------------
+options     | object        | true     |                   | See `Transaction.callOptions`
+epochNumber | string,number | false    | this.defaultEpoch | The end epochNumber to execute call of.
 
 ### Return
 
@@ -682,7 +682,8 @@ options.code    | string | false    |         | The byte code of the contract, c
 ### Example
 
 ```
-> const contract = client.Contract({ abi, code });> contract.abi; // input abi
+> const contract = client.Contract({ abi, code });> contract instanceof Contract;
+   true> contract.abi; // input abi
    [{type:'constructor', inputs:[...]}, ...]> contract.constructor.code; // input code
    "0x6080604052600080..."// deploy a contract by send constructor then wait and get contract address by `PendingTransaction.deployed` trick.> await contract.constructor(100).sendTransaction({ from: account }).deployed();
    "0xc3ed1a06471be1d3bcd014051fbe078387ec0ad8"
@@ -754,10 +755,10 @@ set contract method encode as `data`.
 
 ### Parameters
 
-Name        | Type           | Required | Default | Description
-------------|----------------|----------|---------|-------------------------------
-options     | object         | true     |         | See `Transaction.callOptions`.
-epochNumber | string\|number | true     |         | See `Client.call`.
+Name        | Type          | Required | Default | Description
+------------|---------------|----------|---------|-------------------------------
+options     | object        | true     |         | See `Transaction.callOptions`.
+epochNumber | string,number | true     |         | See `Client.call`.
 
 ### Return
 
@@ -820,7 +821,7 @@ Name            | Type   | Required | Default | Description
 ----------------|--------|----------|---------|---------------------------------
 options         | object | false    |         |
 options.delta   | number | false    | 1000    | Loop transaction interval in ms.
-options.timeout | number | false    | 30*1000 | Loop timeout in ms.
+options.timeout | number | false    | 60*1000 | Loop timeout in ms.
 
 ### Return
 
@@ -836,12 +837,12 @@ Async wait till transaction been confirmed.
 
 ### Parameters
 
-Name              | Type   | Required | Default | Description
-------------------|--------|----------|---------|---------------------------------
-options           | object | false    |         |
-options.delta     | number | false    | 1000    | Loop transaction interval in ms.
-options.timeout   | number | false    | 30*1000 | Loop timeout in ms.
-options.threshold | number | false    | 0.01    | Number in range (0,1)
+Name              | Type   | Required | Default   | Description
+------------------|--------|----------|-----------|---------------------------------
+options           | object | false    |           |
+options.delta     | number | false    | 1000      | Loop transaction interval in ms.
+options.timeout   | number | false    | 5*60*1000 | Loop timeout in ms.
+options.threshold | number | false    | 0.01      | Number in range (0,1)
 
 ### Return
 
@@ -855,12 +856,9 @@ Async wait till contract create transaction deployed.
 
 ### Parameters
 
-Name              | Type   | Required | Default | Description
-------------------|--------|----------|---------|---------------------------------
-options           | object | false    |         |
-options.delta     | number | false    | 1000    | Loop transaction interval in ms.
-options.timeout   | number | false    | 30*1000 | Loop timeout in ms.
-options.threshold | number | false    | 0.01    | Number in range (0,1)
+Name    | Type   | Required | Default | Description
+--------|--------|----------|---------|-----------------------------------
+options | object | false    |         | See `PendingTransaction.confirmed`
 
 ### Return
 
@@ -919,9 +917,9 @@ Create a account by privateKey.
 
 ### Parameters
 
-Name       | Type           | Required | Default | Description
------------|----------------|----------|---------|------------
-privateKey | string\|Buffer | true     |         |
+Name       | Type          | Required | Default | Description
+-----------|---------------|----------|---------|------------
+privateKey | string,Buffer | true     |         |
 
 ### Return
 
@@ -991,7 +989,28 @@ password | string | true     |         |
 ----------
 # wallet.wallet
 
+Contains an in memory wallet with multiple accounts.
 
+## Wallet.size
+
+Get the number of account in wallet.
+1 account have 1 address and 1 privateKey as key
+``
+
+
+## Wallet.constructor
+
+
+
+### Parameters
+
+Name   | Type   | Required | Default | Description
+-------|--------|----------|---------|------------
+client | Client | true     |         |
+
+### Return
+
+`Wallet` 
 
 
 ## Wallet.create
@@ -1002,7 +1021,7 @@ Create a random Account.
 
 Name    | Type   | Required | Default | Description
 --------|--------|----------|---------|-----------------
-entropy | string | true     |         | Hex string seed.
+entropy | string | false    |         | Hex string seed.
 
 ### Return
 
@@ -1030,9 +1049,9 @@ Add a account to wallet by privateKey.
 
 ### Parameters
 
-Name       | Type           | Required | Default | Description
------------|----------------|----------|---------|------------
-privateKey | string\|Buffer | true     |         |
+Name       | Type          | Required | Default | Description
+-----------|---------------|----------|---------|------------
+privateKey | string,Buffer | true     |         |
 
 ### Return
 

@@ -1,4 +1,4 @@
-const Transaction = require('../lib/transaction');
+const Transaction = require('../src/transaction');
 
 const ADDRESS = '0xbbd9e9be525ab967e633bcdaeac8bd5723ed4d6b';
 const KEY = '0xa816a06117e572ca7ae2f786a046d2bc478051d0717bf5cc4f5397923258d393';
@@ -35,4 +35,54 @@ test('Transaction', () => {
 
   tx.value = '0x01';
   expect(tx.from).not.toBe(ADDRESS);
+});
+
+test('sendOptions', () => {
+  expect(() => Transaction.sendOptions()).toThrow('Cannot destructure property');
+  expect(() => Transaction.sendOptions({})).toThrow('`from` is required and should match `Address`');
+  expect(() => Transaction.sendOptions({ from: ADDRESS })).toThrow('`nonce` is required and should match `UInt`');
+  expect(() => Transaction.sendOptions({ nonce: 0, from: ADDRESS })).toThrow('`gasPrice` is required and should match `Drip`');
+  expect(() => Transaction.sendOptions({ nonce: 0, from: ADDRESS, gasPrice: 1 }))
+    .toThrow('`gas` is required and should match `UInt`');
+
+  const tx = Transaction.sendOptions({ nonce: 0, from: ADDRESS, gasPrice: 1, gas: 21000 });
+  expect(tx.from).toBe(ADDRESS);
+  expect(tx.nonce).toBe('0x00');
+  expect(tx.gasPrice).toBe('0x01');
+  expect(tx.gas).toBe('0x5208');
+  expect(tx.to).toBe(undefined);
+  expect(tx.value).toBe(undefined);
+  expect(tx.data).toBe('0x');
+});
+
+test('callOptions', () => {
+  expect(() => Transaction.callOptions()).toThrow('Cannot destructure property');
+  expect(() => Transaction.callOptions({})).toThrow('`to` is required and should match `Address`');
+
+  const tx = Transaction.callOptions({ to: ADDRESS });
+  expect(tx.from).toBe(undefined);
+  expect(tx.nonce).toBe(undefined);
+  expect(tx.gasPrice).toBe(undefined);
+  expect(tx.gas).toBe(undefined);
+  expect(tx.to).toBe(ADDRESS);
+  expect(tx.value).toBe(undefined);
+  expect(tx.data).toBe(undefined);
+});
+
+test('rawOptions', () => {
+  expect(() => Transaction.rawOptions()).toThrow('Cannot destructure property');
+  expect(() => Transaction.rawOptions({})).toThrow('`nonce` is required and should match `UInt`');
+  expect(() => Transaction.rawOptions({ nonce: 0 })).toThrow('`gasPrice` is required and should match `Drip`');
+  expect(() => Transaction.rawOptions({ nonce: 0, gasPrice: 1 })).toThrow('`gas` is required and should match `UInt`');
+
+  const tx = Transaction.rawOptions({ nonce: 0, gasPrice: 1, gas: 21000 });
+  expect(tx.nonce).toBe('0x00');
+  expect(tx.gasPrice).toBe('0x01');
+  expect(tx.gas).toBe('0x5208');
+  expect(tx.to).toBe('0x');
+  expect(tx.value).toBe('0x00');
+  expect(tx.data).toBe('0x');
+  expect(tx.r).toBe(undefined);
+  expect(tx.s).toBe(undefined);
+  expect(tx.v).toBe(undefined);
 });

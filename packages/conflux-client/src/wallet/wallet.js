@@ -1,16 +1,34 @@
-const { Hex, PrivateKey } = require('conflux-utils/lib/type');
+const { Hex, PrivateKey } = require('conflux-utils/src/type');
+const { randomPrivateKey } = require('conflux-utils/src/sign');
 const Account = require('./account');
 
+/**
+ * Contains an in memory wallet with multiple accounts.
+ */
 class Wallet {
+  /**
+   * @param client {Client}
+   * @return {Wallet}
+   */
   constructor(client) {
     this.client = client; // for remote wallet api operate
     this.accountMap = new Map();
   }
 
   /**
+   * Get the number of account in wallet.
+   * 1 account have 1 address and 1 privateKey as key
+   *
+   * @return {number}
+   */
+  get size() {
+    return this.accountMap.size / 2;
+  }
+
+  /**
    * Create a random Account.
    *
-   * @param entropy {string} - Hex string seed.
+   * @param [entropy] {string} - Hex string seed.
    * @return {Account}
    */
   create(entropy) {

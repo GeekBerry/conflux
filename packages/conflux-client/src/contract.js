@@ -17,6 +17,9 @@ class Contract {
    *
    * @example
    * > const contract = client.Contract({ abi, code });
+   * > contract instanceof Contract;
+   true
+
    * > contract.abi; // input abi
    [{type:'constructor', inputs:[...]}, ...]
 

@@ -31,7 +31,11 @@ class WebsocketProvider {
         ws.once('open', () => {
           // ignore message error
           ws.removeEventListener('error');
-          ws.on('error', () => {});
+          ws.on('error', () => {
+            if (ws.readyState === WS.OPEN) {
+              ws.terminate();
+            }
+          });
           resolve();
         });
       });

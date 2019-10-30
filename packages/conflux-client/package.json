@@ -10,9 +10,11 @@
     "url": "git+https://github.com/GeekBerry/conflux.git"
   },
   "files": [
+    "lib",
     "src",
     "index.js",
-    "yarn.lock"
+    "yarn.lock",
+    "readme.md"
   ],
   "scripts": {
     "test": "jest"
