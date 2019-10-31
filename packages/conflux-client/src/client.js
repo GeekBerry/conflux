@@ -253,7 +253,7 @@ class Client {
    * - `string` parentHash: Hash of the parent block.
    * - `string[]` refereeHashes: Array of referee hashes.
    * - `number|null` epochNumber: The current block epochNumber in the client's view. `null` when it's not in best block's past set.
-   * - `boolean` stable: If the block stable or not
+   * - `boolean|null` stable: If the block stable or not. `null` for pending stable.
    * - `string` nonce: Hash of the generated proof-of-work. `null` when its pending block.
    * - `number` gas: The maximum gas allowed in this block.
    * - `string` difficulty: Integer string of the difficulty for this block.
@@ -484,7 +484,7 @@ class Client {
    */
   async getTransactionReceipt(txHash) {
     const result = await this.provider.call('cfx_getTransactionReceipt', TxHash(txHash));
-    return parse.transaction(result);
+    return parse.receipt(result);
   }
 
   /**

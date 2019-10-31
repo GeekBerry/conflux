@@ -50,23 +50,16 @@ parse.block = parse({
 });
 
 parse.transaction = parse({
-  index: parse.number, // getTransactionReceipt
-  transactionIndex: parse.number, // getTransactionByHash
-
-  status: parse.number, // getTransactionByHash
-  outcomeStatus: parse.number, // getTransactionReceipt
-
-  epochNumber: parse.number, // getTransactionReceipt
-
+  transactionIndex: parse.number,
   nonce: parse.number,
   value: parse.bigNumber,
   gasPrice: parse.bigNumber,
-
   gas: parse.number,
-  gasUsed: parse.number,
-
-  timestamp: parse.number,
   v: parse.number,
+});
+
+parse.receipt = parse({
+  gasUsed: parse.number,
 });
 
 module.exports = parse;

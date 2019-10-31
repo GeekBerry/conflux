@@ -98,7 +98,8 @@ class PendingTransaction {
     return loop(
       async () => {
         const receipt = await this.executed({ delta, timeout });
-        if (await this.client.getRiskCoefficient(receipt.blockHash) < threshold) {
+        const risk = await this.client.getRiskCoefficient(receipt.blockHash);
+        if (risk < threshold) {
           return receipt;
         }
       },

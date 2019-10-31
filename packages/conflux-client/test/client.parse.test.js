@@ -43,16 +43,16 @@ test('getBlocksByEpoch', async () => {
 
   expect(Array.isArray(blockHashArray)).toBe(true);
   blockHashArray.forEach(txHash => {
-    expect(Hex.isHex64(txHash)).toBe(true);
+    expect(Hex.isHex32(txHash)).toBe(true);
   });
 });
 
 test('getBlockByHash', async () => {
   const block = await client.getBlockByHash(BLOCK_HASH);
 
-  expect(Hex.isHex64(block.hash)).toBe(true);
-  expect(Hex.isHex40(block.miner)).toBe(true);
-  expect(Hex.isHex64(block.parentHash)).toBe(true);
+  expect(Hex.isHex32(block.hash)).toBe(true);
+  expect(Hex.isHex20(block.miner)).toBe(true);
+  expect(Hex.isHex32(block.parentHash)).toBe(true);
   expect(Hex.isHex(block.transactionsRoot)).toBe(true);
   expect(Hex.isHex(block.deferredLogsBloomHash)).toBe(true);
   expect(Hex.isHex(block.deferredReceiptsRoot)).toBe(true);
@@ -71,7 +71,7 @@ test('getBlockByHash', async () => {
   expect(Array.isArray(block.transactions)).toBe(true);
   expect(lodash.isPlainObject(block.deferredStateRootWithAux)).toBe(true);
   block.transactions.forEach(txHash => {
-    expect(Hex.isHex64(txHash)).toBe(true);
+    expect(Hex.isHex32(txHash)).toBe(true);
   });
 
   const blockDetail = await client.getBlockByHash(BLOCK_HASH, true);
@@ -99,14 +99,14 @@ test('getBlockByHashWithPivotAssumption', async () => {
 test('getTransactionByHash', async () => {
   const transaction = await client.getTransactionByHash(TX_HASH);
 
-  expect(Hex.isHex64(transaction.blockHash)).toBe(true);
-  expect(Hex.isHex64(transaction.hash)).toBe(true);
-  expect(Hex.isHex40(transaction.from)).toBe(true);
-  expect(Hex.isHex40(transaction.to)).toBe(true);
+  expect(Hex.isHex32(transaction.blockHash)).toBe(true);
+  expect(Hex.isHex32(transaction.hash)).toBe(true);
+  expect(Hex.isHex20(transaction.from)).toBe(true);
+  expect(Hex.isHex20(transaction.to)).toBe(true);
   expect(Hex.isHex(transaction.data)).toBe(true);
-  expect(Hex.isHex64(transaction.r)).toBe(true);
-  expect(Hex.isHex64(transaction.s)).toBe(true);
-  expect(Hex.isHex40(transaction.contractCreated) || lodash.isNull(transaction.contractCreated)).toBe(true);
+  expect(Hex.isHex32(transaction.r)).toBe(true);
+  expect(Hex.isHex32(transaction.s)).toBe(true);
+  expect(Hex.isHex20(transaction.contractCreated) || lodash.isNull(transaction.contractCreated)).toBe(true);
   expect(Number.isInteger(transaction.transactionIndex)).toBe(true);
   expect(Number.isInteger(transaction.nonce)).toBe(true);
   expect(Number.isInteger(transaction.gas)).toBe(true);
@@ -119,13 +119,13 @@ test('getTransactionByHash', async () => {
 test('getTransactionReceipt', async () => {
   const receipt = await client.getTransactionReceipt(TX_HASH);
 
-  expect(Hex.isHex64(receipt.blockHash)).toBe(true);
-  expect(Hex.isHex64(receipt.transactionHash)).toBe(true);
-  expect(Hex.isHex40(receipt.from)).toBe(true);
-  expect(Hex.isHex40(receipt.to)).toBe(true);
+  expect(Hex.isHex32(receipt.blockHash)).toBe(true);
+  expect(Hex.isHex32(receipt.transactionHash)).toBe(true);
+  expect(Hex.isHex20(receipt.from)).toBe(true);
+  expect(Hex.isHex20(receipt.to)).toBe(true);
   expect(Hex.isHex(receipt.logsBloom)).toBe(true);
   expect(Hex.isHex(receipt.stateRoot)).toBe(true);
-  expect(Hex.isHex40(receipt.contractCreated) || lodash.isNull(receipt.contractCreated)).toBe(true);
+  expect(Hex.isHex20(receipt.contractCreated) || lodash.isNull(receipt.contractCreated)).toBe(true);
   expect(Number.isInteger(receipt.index)).toBe(true);
   expect(Number.isInteger(receipt.epochNumber)).toBe(true);
   expect(Number.isInteger(receipt.outcomeStatus)).toBe(true);
@@ -145,10 +145,10 @@ test('sendTransaction by address', async () => {
   expect(Hex.isHex(txHash)).toBe(true);
 
   const transactionCreated = await promise.get({ delta: 0 });
-  expect(Hex.isHex64(transactionCreated.hash)).toBe(true);
+  expect(Hex.isHex32(transactionCreated.hash)).toBe(true);
 
   const transactionMined = await promise.mined();
-  expect(Hex.isHex64(transactionMined.blockHash)).toBe(true);
+  expect(Hex.isHex32(transactionMined.blockHash)).toBe(true);
 
   const receiptExecute = await promise.executed();
   expect(receiptExecute.outcomeStatus).toBe(0);

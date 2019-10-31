@@ -93,6 +93,7 @@ class Method extends Function {
     this.client = client;
     this.contract = contract;
     this.abi = abi;
+    this.code = web3Abi.encodeFunctionSignature(this.abi);
     return new Proxy(this, this.constructor);
   }
 
@@ -103,13 +104,23 @@ class Method extends Function {
     });
   }
 
-  encode(params) {
-    return web3Abi.encodeFunctionCall(this.abi, params);
+  params(data) {
+    if (!data.startsWith(this.code)) {
+      return undefined;
+    }
+    const hex = '0x' + data.slice(this.code.length);
+    const decode = ethAbi.decode(this.abi.inputs, hex);
+    return [...decode];
   }
 
-  decode(value) {
-    const array = ethAbi.decode(this.abi.outputs, value);
-    return array.length <= 1 ? array[0] : array;
+  encode(params) {
+    return this.code + web3Abi.encodeParameters(this.abi.inputs, params).replace('0x', '');
+  }
+
+  decode(hex) {
+    const decode = ethAbi.decode(this.abi.outputs, hex);
+    const outputs = [...decode];
+    return outputs.length <= 1 ? outputs[0] : outputs;
   }
 }
 
@@ -132,8 +143,8 @@ class Constructor extends Method {
     return this.code + web3Abi.encodeParameters(this.abi.inputs, params).replace('0x', '');
   }
 
-  decode(value) {
-    return value;
+  decode(hex) {
+    return hex;
   }
 }
 

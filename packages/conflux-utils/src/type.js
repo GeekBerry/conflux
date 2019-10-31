@@ -53,11 +53,11 @@ Hex.isHex = function (hex) {
   return /^0x([0-9a-f][0-9a-f])*$/.test(hex);
 };
 
-Hex.isHex40 = function (hex) {
+Hex.isHex20 = function (hex) {
   return /^0x[0-9a-f]{40}$/.test(hex);
 };
 
-Hex.isHex64 = function (hex) {
+Hex.isHex32 = function (hex) {
   return /^0x[0-9a-f]{64}$/.test(hex);
 };
 
