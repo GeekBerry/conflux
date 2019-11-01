@@ -1,5 +1,5 @@
 const BigNumber = require('bignumber.js');
-const { Hex, EpochNumber } = require('conflux-utils/src/type');
+const { Hex, EpochNumber } = require('conflux-js-utils/src/type');
 
 const Client = require('../index');
 const MockProvider = require('./__mocks__/provider');

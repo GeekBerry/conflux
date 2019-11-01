@@ -1,6 +1,6 @@
 const lodash = require('lodash');
 const BigNumber = require('bignumber.js');
-const { Hex } = require('conflux-utils/src/type');
+const { Hex } = require('conflux-js-utils/src/type');
 
 const Client = require('../index');
 const MockProvider = require('./__mocks__/provider');

@@ -1,5 +1,5 @@
-const { Hex, PrivateKey } = require('conflux-utils/src/type');
-const { randomPrivateKey } = require('conflux-utils/src/sign');
+const { Hex, PrivateKey } = require('conflux-js-utils/src/type');
+const { randomPrivateKey } = require('conflux-js-utils/src/sign');
 const Account = require('./account');
 
 /**

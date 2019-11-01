@@ -1,4 +1,4 @@
-const { Hex } = require('conflux-utils/src/type');
+const { Hex } = require('conflux-js-utils/src/type');
 const Client = require('../index');
 const MockProvider = require('./__mocks__/provider');
 const { abi, code, address } = require('./__mocks__/contract.json');

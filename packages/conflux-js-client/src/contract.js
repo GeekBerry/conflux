@@ -46,7 +46,7 @@ class Contract {
    * > await contract.count().estimateGas({ from: ADDRESS, nonce: 68 }); // if from is a address string, nonce is required
    21655
 
-   * // send transaction from account instance, then wail till confirmed, and get receipt.
+   * // send transaction from account instance, then wait till confirmed, and get receipt.
    * > await contract.inc(1)
    .sendTransaction({ from: account1 })
    .confirmed({ threshold: 0.01, timeout: 30 * 1000 });

@@ -1,13 +1,13 @@
 {
-  "name": "conflux-client",
+  "name": "conflux-js-client",
   "version": "0.0.0",
-  "description": "conflux client",
+  "description": "conflux javascript client",
   "license": "LGPL-3.0",
   "main": "index.js",
-  "homepage": "https://github.com/GeekBerry/conflux#readme",
+  "homepage": "https://github.com/GeekBerry/conflux-js#readme",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/GeekBerry/conflux.git"
+    "url": "git+https://github.com/GeekBerry/conflux-js.git"
   },
   "files": [
     "lib",
@@ -21,7 +21,7 @@
   },
   "dependencies": {
     "bignumber.js": "^9.0.0",
-    "conflux-utils": "^0.0.0",
+    "conflux-js-utils": "^0.0.0",
     "ethers": "^4.0.38",
     "lodash": "^4.17.15",
     "superagent": "^5.1.0",

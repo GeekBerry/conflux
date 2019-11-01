@@ -1,5 +1,5 @@
-const { Hex, EpochNumber } = require('conflux-utils/src/type');
-const { randomBuffer } = require('conflux-utils/src/sign');
+const { Hex, EpochNumber } = require('conflux-js-utils/src/type');
+const { randomBuffer } = require('conflux-js-utils/src/sign');
 
 const data = require('./data.json');
 

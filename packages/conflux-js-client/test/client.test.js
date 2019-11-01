@@ -1,6 +1,5 @@
-const { Hex, EpochNumber } = require('conflux-utils/src/type');
+const { EpochNumber } = require('conflux-js-utils/src/type');
 const Client = require('../index');
-// const MockProvider = require('./mock/provider');
 
 // ----------------------------------------------------------------------------
 

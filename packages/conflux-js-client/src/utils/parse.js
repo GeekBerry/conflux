@@ -55,10 +55,14 @@ parse.transaction = parse({
   value: parse.bigNumber,
   gasPrice: parse.bigNumber,
   gas: parse.number,
+  status: parse.number,
   v: parse.number,
 });
 
 parse.receipt = parse({
+  index: parse.number, // XXX: number already in rpc return
+  epochNumber: parse.number, // XXX: number already in rpc return
+  outcomeStatus: parse.number, // XXX: number already in rpc return
   gasUsed: parse.number,
 });
 

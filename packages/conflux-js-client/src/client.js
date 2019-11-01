@@ -1,7 +1,7 @@
 const lodash = require('lodash');
 const { HttpProvider, WebsocketProvider } = require('../lib/provider');
-const { Hex, Address, EpochNumber, BlockHash, TxHash } = require('conflux-utils/src/type');
-const Transaction = require('conflux-utils/src/transaction');
+const { Hex, Address, EpochNumber, BlockHash, TxHash } = require('conflux-js-utils/src/type');
+const Transaction = require('conflux-js-utils/src/transaction');
 
 const parse = require('./utils/parse');
 const Contract = require('./contract');
@@ -553,7 +553,7 @@ class Client {
     ...
    }
 
-   * > await promise.executed(); // wail till transaction executed in right status. and return it's receipt.
+   * > await promise.executed(); // wait till transaction executed in right status. and return it's receipt.
    {
     "blockHash": "0xe9b22ce311003e26c7330ac54eea9f8afea0ffcd4905828f27c9e2c02f3a00f7",
     "index": 0,
