@@ -1,1 +1,1 @@
-# conflux-client
+# conflux-js-client

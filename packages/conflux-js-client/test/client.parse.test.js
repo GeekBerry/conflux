@@ -61,11 +61,11 @@ test('getBlockByHash', async () => {
   // expect(lodash.isBoolean(block.stable)).toBe(true); ???
   expect(Number.isInteger(block.blame)).toBe(true);
   expect(Number.isInteger(block.epochNumber)).toBe(true);
-  expect(Number.isInteger(block.gasLimit)).toBe(true);
   expect(Number.isInteger(block.nonce)).toBe(true);
   expect(Number.isInteger(block.size)).toBe(true);
   expect(Number.isInteger(block.height)).toBe(true);
   expect(Number.isInteger(block.timestamp)).toBe(true);
+  expect(BigNumber.isBigNumber(block.gasLimit)).toBe(true);
   expect(BigNumber.isBigNumber(block.difficulty)).toBe(true);
   expect(Array.isArray(block.refereeHashes)).toBe(true);
   expect(Array.isArray(block.transactions)).toBe(true);
@@ -109,9 +109,9 @@ test('getTransactionByHash', async () => {
   expect(Hex.isHex20(transaction.contractCreated) || lodash.isNull(transaction.contractCreated)).toBe(true);
   expect(Number.isInteger(transaction.transactionIndex)).toBe(true);
   expect(Number.isInteger(transaction.nonce)).toBe(true);
-  expect(Number.isInteger(transaction.gas)).toBe(true);
   expect(Number.isInteger(transaction.status)).toBe(true);
   expect(Number.isInteger(transaction.v)).toBe(true);
+  expect(BigNumber.isBigNumber(transaction.gas)).toBe(true);
   expect(BigNumber.isBigNumber(transaction.gasPrice)).toBe(true);
   expect(BigNumber.isBigNumber(transaction.value)).toBe(true);
 });
@@ -129,7 +129,7 @@ test('getTransactionReceipt', async () => {
   expect(Number.isInteger(receipt.index)).toBe(true);
   expect(Number.isInteger(receipt.epochNumber)).toBe(true);
   expect(Number.isInteger(receipt.outcomeStatus)).toBe(true);
-  expect(Number.isInteger(receipt.gasUsed)).toBe(true);
+  expect(BigNumber.isBigNumber(receipt.gasUsed)).toBe(true);
   expect(Array.isArray(receipt.logs)).toBe(true);
 });
 

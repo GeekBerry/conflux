@@ -41,7 +41,7 @@ class PendingTransaction {
    * @param [options.timeout=30*1000] {number} - Loop timeout in ms.
    * @return {Promise<object>} See `Client.getTransactionByHash`
    */
-  async mined({ delta = 1000, timeout = 30 * 1000 } = {}) {
+  async mined({ delta = 1000, timeout = 60 * 1000 } = {}) {
     return loop(
       async () => {
         const tx = await this.get();
@@ -65,7 +65,7 @@ class PendingTransaction {
    * @param [options.timeout=60*1000] {number} - Loop timeout in ms.
    * @return {Promise<object>} See `Client.getTransactionReceipt`
    */
-  async executed({ delta = 1000, timeout = 60 * 1000 } = {}) {
+  async executed({ delta = 1000, timeout = 5 * 60 * 1000 } = {}) {
     const txHash = await this;
     return loop(
       async () => {
@@ -94,7 +94,7 @@ class PendingTransaction {
    * @param [options.threshold=0.01] {number} - Number in range (0,1)
    * @return {Promise<object>} See `Client.getTransactionReceipt`
    */
-  async confirmed({ threshold = 0.01, delta = 1000, timeout = 5 * 60 * 1000 } = {}) {
+  async confirmed({ threshold = 0.01, delta = 1000, timeout = 30 * 60 * 1000 } = {}) {
     return loop(
       async () => {
         const receipt = await this.executed({ delta, timeout });

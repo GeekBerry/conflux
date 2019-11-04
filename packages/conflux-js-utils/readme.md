@@ -1,1 +1,1 @@
-# conflux-utils
+# conflux-js-utils

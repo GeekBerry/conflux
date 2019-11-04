@@ -44,7 +44,7 @@ parse.block = parse({
   height: parse.number,
   size: parse.number,
   timestamp: parse.number,
-  gasLimit: parse.number,
+  gasLimit: parse.bigNumber,
   difficulty: parse.bigNumber,
   transactions: parse([v => (lodash.isObject(v) ? parse.transaction(v) : v)]),
 });
@@ -54,8 +54,8 @@ parse.transaction = parse({
   nonce: parse.number,
   value: parse.bigNumber,
   gasPrice: parse.bigNumber,
-  gas: parse.number,
-  status: parse.number,
+  gas: parse.bigNumber,
+  status: parse.number, // XXX: might be remove in rpc returned
   v: parse.number,
 });
 
@@ -63,7 +63,7 @@ parse.receipt = parse({
   index: parse.number, // XXX: number already in rpc return
   epochNumber: parse.number, // XXX: number already in rpc return
   outcomeStatus: parse.number, // XXX: number already in rpc return
-  gasUsed: parse.number,
+  gasUsed: parse.bigNumber,
 });
 
 module.exports = parse;
