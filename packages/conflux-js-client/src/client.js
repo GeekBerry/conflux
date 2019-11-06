@@ -27,7 +27,7 @@ class Client {
    *   url: 'http://localhost:8000',
    *   defaultGasPrice: 100,
    *   defaultGas: 100000,
-   *   log: console.log,
+   *   logger: console,
    * });
    */
   constructor({

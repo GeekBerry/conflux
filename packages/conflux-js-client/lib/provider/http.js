@@ -1,36 +1,20 @@
 const superagent = require('superagent');
+const BaseProvider = require('./base');
 
 /**
  * Http protocol json rpc provider.
  */
-class HttpProvider {
+class HttpProvider extends BaseProvider {
   /**
    * @param url {string} - Full json rpc http url
-   * @param [options] {object}
-   * @param [options.timeout=60*1000] {number} - Request time out in ms
-   * @param [options.log] {function} - Log function
+   * @param [options] {object} - See `BaseProvider.constructor`
    * @return {HttpProvider}
    *
    * @example
-   * > const provider = new HttpProvider('http://testnet-jsonrpc.conflux-chain.org:12537', {log: console.info});
+   * > const provider = new HttpProvider('http://testnet-jsonrpc.conflux-chain.org:12537', {logger: console});
    */
-  constructor(url, {
-    timeout = 60 * 1000,
-    log,
-  } = {}) {
-    this.url = url;
-    this.timeout = timeout;
-    this.log = log;
-  }
-
-  /**
-   * Gen a random json rpc id.
-   * It is used in `call` method, overwrite it to gen your own id.
-   *
-   * @return {string}
-   */
-  requestId() {
-    return `${Date.now()}${Math.random().toFixed(7).substring(2)}`; // 13+7=20 int string
+  constructor(url, options) {
+    super(url, options);
   }
 
   /**
@@ -54,17 +38,15 @@ class HttpProvider {
       .send(data)
       .timeout(this.timeout);
 
-    if (this.log) {
-      this.log({ data, result, error, duration: Date.now() - startTime });
+    if (error) {
+      this.logger.error({ data, error, duration: Date.now() - startTime });
+      throw new BaseProvider.RPCError(error);
+    } else {
+      this.logger.info({ data, result, duration: Date.now() - startTime });
     }
 
-    if (error) {
-      throw new Error(JSON.stringify(error));
-    }
     return result;
   }
-
-  close() {}
 }
 
 module.exports = HttpProvider;

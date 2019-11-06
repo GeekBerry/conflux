@@ -1,6 +1,6 @@
 const { Hex, EpochNumber } = require('conflux-js-utils/src/type');
 const { randomBuffer } = require('conflux-js-utils/src/sign');
-
+const BaseProvider = require('../../lib/provider/base');
 const data = require('./data.json');
 
 const fullNode = {
@@ -91,17 +91,7 @@ const fullNode = {
 };
 
 // ==========================================================================
-class MockProvider {
-  constructor(url = null, {
-    log,
-  } = {}) {
-    this.log = log;
-  }
-
-  requestId() {
-    return `${Date.now()}${Math.random().toFixed(7).substring(2)}`; // 13+7=20 int string
-  }
-
+class MockProvider extends BaseProvider {
   async call(method, ...params) {
     const startTime = Date.now();
     const data = { jsonrpc: '2.0', id: this.requestId(), method, params };
@@ -114,13 +104,13 @@ class MockProvider {
       error = e;
     }
 
-    if (this.log) {
-      this.log({ data, result, error, duration: Date.now() - startTime });
+    if (error) {
+      this.logger.error({ data, error, duration: Date.now() - startTime });
+      throw new BaseProvider.RPCError(error);
+    } else {
+      this.logger.info({ data, result, duration: Date.now() - startTime });
     }
 
-    if (error) {
-      throw new Error(error);
-    }
     return result;
   }
 

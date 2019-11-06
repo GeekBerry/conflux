@@ -30,7 +30,7 @@ options.defaultGas      | string,number,BigNumber | false    |                  
 ```
 
 ```
-> const client = new Client({  url: 'http://localhost:8000',  defaultGasPrice: 100,  defaultGas: 100000,  log: console.log,});
+> const client = new Client({  url: 'http://localhost:8000',  defaultGasPrice: 100,  defaultGas: 100000,  logger: console,});
 ```
 
 ## Client.setProvider
@@ -122,7 +122,9 @@ Returns the current epochNumber the client is on.
 
 ### Parameters
 
-`void`
+Name        | Type          | Required | Default | Description
+------------|---------------|----------|---------|-----------------------------------------
+epochNumber | string,number | false    |         | The end epochNumber to count balance of.
 
 ### Return
 

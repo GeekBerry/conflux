@@ -1,20 +1,11 @@
 const EventEmitter = require('events');
 const WS = require('ws');
+const BaseProvider = require('./base');
 
-class WebsocketProvider {
-  constructor(url, {
-    timeout = 60 * 1000,
-    log,
-  } = {}) {
-    this.url = url;
-    this.timeout = timeout;
-    this.log = log;
-
+class WebsocketProvider extends BaseProvider {
+  constructor(url, options) {
+    super(url, options);
     this.messageEvent = new EventEmitter();
-  }
-
-  requestId() {
-    return `${Date.now()}${Math.random().toFixed(7).substring(2)}`; // 13+7=20 int string
   }
 
   async getWS() {
@@ -66,14 +57,13 @@ class WebsocketProvider {
       );
 
       this.messageEvent.once(data.id, ({ error, result }) => {
-        if (this.log) {
-          this.log({ data, result, error, duration: Date.now() - startTime });
-        }
-
         clearTimeout(timeoutHandle);
+
         if (error) {
-          reject(error);
+          this.logger.error({ data, error, duration: Date.now() - startTime });
+          reject(new BaseProvider.RPCError(error));
         } else {
+          this.logger.info({ data, result, duration: Date.now() - startTime });
           resolve(result);
         }
       });
