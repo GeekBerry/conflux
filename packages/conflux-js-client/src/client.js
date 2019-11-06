@@ -134,14 +134,15 @@ class Client {
   /**
    * Returns the current epochNumber the client is on.
    *
+   * @param [epochNumber] {string|number} - The end epochNumber to count balance of.
    * @return {Promise<number>} EpochNumber
    *
    * @example
    * > await client.epochNumber();
    200109
    */
-  async epochNumber() {
-    const result = await this.provider.call('cfx_epochNumber');
+  async epochNumber(epochNumber = EpochNumber.LATEST_MINED) {
+    const result = await this.provider.call('cfx_epochNumber', EpochNumber(epochNumber));
     return parse.number(result);
   }
 

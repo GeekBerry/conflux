@@ -61,10 +61,10 @@ test('getBlockByHash', async () => {
   // expect(lodash.isBoolean(block.stable)).toBe(true); ???
   expect(Number.isInteger(block.blame)).toBe(true);
   expect(Number.isInteger(block.epochNumber)).toBe(true);
-  expect(Number.isInteger(block.nonce)).toBe(true);
   expect(Number.isInteger(block.size)).toBe(true);
   expect(Number.isInteger(block.height)).toBe(true);
   expect(Number.isInteger(block.timestamp)).toBe(true);
+  expect(block.nonce.startsWith('0x')).toBe(true);
   expect(BigNumber.isBigNumber(block.gasLimit)).toBe(true);
   expect(BigNumber.isBigNumber(block.difficulty)).toBe(true);
   expect(Array.isArray(block.refereeHashes)).toBe(true);
@@ -103,7 +103,7 @@ test('getTransactionByHash', async () => {
   expect(Hex.isHex32(transaction.hash)).toBe(true);
   expect(Hex.isHex20(transaction.from)).toBe(true);
   expect(Hex.isHex20(transaction.to)).toBe(true);
-  expect(Hex.isHex(transaction.data)).toBe(true);
+  expect(transaction.data.startsWith('0x')).toBe(true);
   expect(Hex.isHex32(transaction.r)).toBe(true);
   expect(Hex.isHex32(transaction.s)).toBe(true);
   expect(Hex.isHex20(transaction.contractCreated) || lodash.isNull(transaction.contractCreated)).toBe(true);

@@ -76,6 +76,7 @@ Hex.toBuffer = function (hex) {
   }
   return buffer;
 };
+
 // ---------------------------------- UInt ------------------------------------
 /**
  * @memberOf type
@@ -83,7 +84,7 @@ Hex.toBuffer = function (hex) {
  * @return {string}
  */
 function UInt(value) {
-  return Hex(Number(value))
+  return Hex(Number(value));
 }
 
 // ---------------------------------- Drip ------------------------------------

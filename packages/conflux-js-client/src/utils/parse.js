@@ -40,7 +40,6 @@ parse.bigNumber = parse(BigNumber);
 parse.block = parse({
   epochNumber: parse.number,
   stable: parse.boolean,
-  nonce: parse.number,
   height: parse.number,
   size: parse.number,
   timestamp: parse.number,
